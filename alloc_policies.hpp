@@ -18,6 +18,8 @@ public:
     typedef typename alloc_traits::const_pointer const_pointer;
     typedef typename alloc_traits::size_type size_type;
 
+    typedef alloc_traits allocation_traits;
+
     template <typename U>
     using rebind = default_allocation_policy<U>;
 
@@ -27,7 +29,7 @@ public:
     pointer allocate(size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint = 0)
     {
         if (!ptr) {
-            return reinterpret_cast<pointer>(::operator new(n * sizeof(value_type)));
+            return reinterpret_cast<pointer>(::operator new(n * sizeof(value_type), std::nothrow));
         }
         return ptr;
     }
@@ -40,6 +42,14 @@ public:
 };
 
 template <typename T, typename alloc_traits = allocation_traits<T>>
+class throw_bad_alloc_policy
+{
+public:
+
+
+};
+
+template <typename T, typename alloc_traits = allocation_traits<T>>
 class logging_policy
 {
 public:
@@ -48,6 +58,8 @@ public:
     typedef typename alloc_traits::pointer pointer;
     typedef typename alloc_traits::const_pointer const_pointer;
     typedef typename alloc_traits::size_type size_type;
+
+    typedef alloc_traits allocation_traits;
 
     template <typename U>
     using rebind = logging_policy<U>;

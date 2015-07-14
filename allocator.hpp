@@ -2,11 +2,30 @@
 #define ALLOCATOR_H
 
 #include <memory>
+#include <type_traits>
 
 #include "alloc_traits.hpp"
 
 namespace alloc_utility
 {
+
+namespace details
+{
+    // conversation from constant to type
+    // will be useful further
+
+    template <bool b>
+    struct bool_to_type
+    {
+        typedef std::true_type type;
+    };
+
+    template <>
+    struct bool_to_type<false>
+    {
+        typedef std::false_type type;
+    };
+}
 
 template <typename T, typename alloc_traits, typename... alloc_policies>
 class allocator: public alloc_policies...
@@ -23,6 +42,8 @@ public:
     typedef typename alloc_traits::const_reference const_reference;
     typedef typename alloc_traits::size_type size_type;
     typedef typename alloc_traits::difference_type difference_type;
+
+    typedef alloc_traits allocation_traits;
 
     template <typename U>
     struct rebind
@@ -76,6 +97,38 @@ public:
 
 private:
 
+    // helper functions to call allocate method from allocator (if it is defined)
+
+    template <typename policy>
+    static pointer maybe_call_allocate(std::true_type, allocator& alloc,
+                                       size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint)
+    {
+        return alloc.policy::allocate(n, ptr, hint);
+    }
+
+    template <typename policy>
+    static pointer maybe_call_allocate(std::false_type, allocator& alloc,
+                                       size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint)
+    {
+        return ptr;
+    }
+
+    template <typename policy>
+    static void maybe_call_deallocate(std::true_type, allocator& alloc,
+                                      const pointer& ptr, size_type n)
+    {
+        alloc.policy::deallocate(ptr, n);
+    }
+
+    template <typename policy>
+    static void maybe_call_deallocate(std::false_type, allocator& alloc,
+                                      const pointer& ptr, size_type n)
+    {
+        return;
+    }
+
+    // helper struct for iterate through policies
+
     template <typename... policies>
     struct allocate_helper
     {
@@ -92,13 +145,17 @@ private:
         static pointer allocate(allocator& alloc,
                                 size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint)
         {
-            return alloc.policy::allocate(n, ptr, hint);
+            return maybe_call_allocate<policy>(
+                        typename details::bool_to_type<is_allocate_defined<policy>::value>::type(),
+                        alloc, n, ptr, hint);
         }
 
         static void deallocate(allocator& alloc,
                                const pointer& ptr, size_type n)
         {
-            alloc.policy::deallocate(ptr, n);
+            maybe_call_deallocate<policy>(
+                        typename details::bool_to_type<is_deallocate_defined<policy>::value>::type(),
+                        alloc, ptr, n);
         }
     };
 
@@ -108,14 +165,18 @@ private:
         static pointer allocate(allocator& alloc,
                                 size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint)
         {
-            pointer new_ptr = alloc.policy::allocate(n, ptr, hint);
+            pointer new_ptr = maybe_call_allocate<policy>(
+                                  typename details::bool_to_type<is_allocate_defined<policy>::value>::type(),
+                                  alloc, n, ptr, hint);
             return allocate_helper<policies...>::allocate(alloc, n, new_ptr, hint);
         }
 
         static void deallocate(allocator& alloc,
                                const pointer& ptr, size_type n)
         {
-            alloc.policy::deallocate(ptr, n);
+            maybe_call_deallocate<policy>(
+                        typename details::bool_to_type<is_deallocate_defined<policy>::value>::type(),
+                        alloc, ptr, n);
             allocate_helper<policies...>::deallocate(alloc, ptr, n);
         }
     };

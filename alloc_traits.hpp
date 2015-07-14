@@ -56,6 +56,69 @@ public:
     }
 };
 
+// trait for check existance of allocate function in policy
+
+template <typename C>
+class is_allocate_defined
+{
+
+    template <
+              typename X,
+              typename C::allocation_traits::pointer (X::*)
+                        (
+                         typename C::allocation_traits::size_type n,
+                         const typename C::allocation_traits::pointer&,
+                         std::allocator<void>::const_pointer
+                        ) = &X::allocate
+             >
+    struct check_helper {};
+
+    typedef char true_type;
+    struct false_type { true_type m[2]; };
+
+    template <typename X>
+    static true_type check(check_helper<X>* p);
+
+    template <typename X>
+    static false_type check(...);
+
+public:
+
+    static bool const value = sizeof((check<C>)(0)) == sizeof(true_type);
+};
+
+// trait for check existance of deallocate function in policy
+
+template <typename C, typename alloc_traits = allocation_traits<C>>
+class is_deallocate_defined
+{
+    typedef typename C::allocation_traits::pointer pointer;
+    typedef typename C::allocation_traits::size_type size_type;
+
+    template <
+              typename X,
+              void (X::*)
+                         (
+                          const typename C::allocation_traits::pointer& ptr,
+                          typename C::allocation_traits::size_type n
+                         ) = &X::deallocate
+             >
+    struct check_helper {};
+
+    typedef char true_type;
+    struct false_type { true_type m[2]; };
+
+    template <typename X>
+    static true_type check(check_helper<X>* p);
+
+    template <typename X>
+    static false_type check(...);
+
+public:
+
+    static bool const value = sizeof((check<C>)(0)) == sizeof(true_type);
+};
+
 }
 
 #endif // ALLOC_TRAITS_HPP
