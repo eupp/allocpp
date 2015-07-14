@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cassert>
+#include <vector>
 
 #include "allocator.h"
 
@@ -56,12 +57,21 @@ void test_maxsize()
     assert(alloc.max_size() >= 0);
 }
 
+void test_stl_vector()
+{
+    std::vector<int, simple_int_allocator> vec;
+    for (int i = 0; i < 1000; ++i) {
+        vec.push_back(i);
+    }
+}
+
 int main()
 {
     test_allocate();
     test_address();
     test_construct();
     test_maxsize();
+    test_stl_vector();
 
     return 0;
 }
