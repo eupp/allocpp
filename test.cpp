@@ -2,7 +2,8 @@
 #include <cassert>
 #include <vector>
 
-#include "allocator.h"
+#include "allocator.hpp"
+#include "alloc_policies.hpp"
 
 using namespace alloc_utility;
 
@@ -15,8 +16,8 @@ struct C
     {}
 };
 
-typedef allocator<int, allocation_traits<int>> simple_int_allocator;
-typedef allocator<C, allocation_traits<C>> simple_object_allocator;
+typedef allocator<int, allocation_traits<int>, default_allocation_policy<int>> simple_int_allocator;
+typedef allocator<C, allocation_traits<C>, default_allocation_policy<C>> simple_object_allocator;
 
 void test_allocate()
 {
@@ -65,6 +66,20 @@ void test_stl_vector()
     }
 }
 
+void test_logging()
+{
+    typedef allocator<int, allocation_traits<int>,
+                      default_allocation_policy<int>,
+                      logging_policy<int>
+                     > logging_allocator;
+    logging_allocator alloc;
+    alloc.set_log(&std::cout);
+    std::vector<int, logging_allocator> vec(alloc);
+    for (int i = 0; i < 1000; ++i) {
+        vec.push_back(i);
+    }
+}
+
 int main()
 {
     test_allocate();
@@ -72,6 +87,8 @@ int main()
     test_construct();
     test_maxsize();
     test_stl_vector();
+
+    test_logging();
 
     return 0;
 }
