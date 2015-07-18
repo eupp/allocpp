@@ -52,7 +52,7 @@ void test_construct()
     alloc.deallocate(p, 1);
 }
 
-void test_maxsize()
+void test_max_size()
 {
     simple_int_allocator alloc;
     assert(alloc.max_size() >= 0);
@@ -80,15 +80,30 @@ void test_logging()
     }
 }
 
+void test_bad_alloc_exc()
+{
+    typedef allocator<int, allocation_traits<int>,
+                      throw_bad_alloc_policy<int>
+                     > throwing_allocator;
+    throwing_allocator alloc;
+    try {
+        alloc.allocate(1);
+        assert(false);
+    } catch (std::bad_alloc& exc) {
+        assert(true);
+    }
+}
+
 int main()
 {
     test_allocate();
     test_address();
     test_construct();
-    test_maxsize();
+    test_max_size();
     test_stl_vector();
 
     test_logging();
+    test_bad_alloc_exc();
 
 
     return 0;

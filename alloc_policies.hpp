@@ -2,6 +2,7 @@
 #define ALLOC_POLICIES_H
 
 #include <iostream>
+#include <new>
 
 #include "alloc_traits.hpp"
 
@@ -22,9 +23,6 @@ public:
 
     template <typename U>
     using rebind = default_allocation_policy<U>;
-
-    template <typename U>
-    using rebind_pointer = typename std::pointer_traits<pointer>::template rebind<U>;
 
     template <typename next_policy>
     pointer allocate(size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint,
@@ -53,7 +51,31 @@ class throw_bad_alloc_policy
 {
 public:
 
+    typedef T value_type;
+    typedef typename alloc_traits::pointer pointer;
+    typedef typename alloc_traits::const_pointer const_pointer;
+    typedef typename alloc_traits::size_type size_type;
 
+    typedef alloc_traits allocation_traits;
+
+    template <typename U>
+    using rebind = throw_bad_alloc_policy<U>;
+
+    template <typename next_policy>
+    pointer allocate(size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint,
+                     next_policy policy)
+    {
+        if (!ptr) {
+            throw std::bad_alloc();
+        }
+    }
+
+    template <typename next_policy>
+    void deallocate(const pointer& ptr, size_type n,
+                    next_policy policy)
+    {
+        policy(this, ptr, n);
+    }
 };
 
 template <typename T, typename alloc_traits = allocation_traits<T>>
@@ -70,9 +92,6 @@ public:
 
     template <typename U>
     using rebind = logging_policy<U>;
-
-    template <typename U>
-    using rebind_pointer = typename std::pointer_traits<pointer>::template rebind<U>;
 
     logging_policy(std::ostream* log = nullptr):
         m_log(log)
