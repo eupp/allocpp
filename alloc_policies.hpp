@@ -26,17 +26,24 @@ public:
     template <typename U>
     using rebind_pointer = typename std::pointer_traits<pointer>::template rebind<U>;
 
-    pointer allocate(size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint = 0)
+    template <typename next_policy>
+    pointer allocate(size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint,
+                     next_policy policy)
     {
+        pointer res = ptr;
         if (!ptr) {
-            return reinterpret_cast<pointer>(::operator new(n * sizeof(value_type), std::nothrow));
+            res = static_cast<pointer>(::operator new(n * sizeof(value_type), std::nothrow));
         }
-        return ptr;
+        res = policy(this, n, res, hint);
+        return res;
     }
 
-    void deallocate(const pointer& p, size_type n)
+    template <typename next_policy>
+    void deallocate(const pointer& ptr, size_type n,
+                    next_policy policy)
     {
-        ::operator delete(reinterpret_cast<void*>(p));
+        ::operator delete(static_cast<void*>(ptr));
+        policy(this, ptr, n);
     }
 
 };
@@ -71,19 +78,25 @@ public:
         m_log(log)
     {}
 
-    pointer allocate(size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint = 0)
+    template <typename next_policy>
+    pointer allocate(size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint,
+                     next_policy policy)
     {
         if (ptr && m_log) {
             *m_log << "Allocate at " << ptr << " " << n * sizeof(value_type) << " bytes" << std::endl;
         }
-        return ptr;
+        pointer res = policy(this, n, ptr, hint);
+        return res;
     }
 
-    void deallocate(const pointer& ptr, size_type n)
+    template <typename next_policy>
+    void deallocate(const pointer& ptr, size_type n,
+                    next_policy policy)
     {
         if (m_log) {
             *m_log << "Deallocate at " << ptr << " " << n * sizeof(value_type) << " bytes" << std::endl;
         }
+        policy(this, ptr, n);
     }
 
     std::ostream* log() const

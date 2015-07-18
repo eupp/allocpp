@@ -57,7 +57,7 @@ namespace details
         static pointer allocate(alloc* allocator,
                                 size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint = 0)
         {
-            allocator->alloc_policy::allocate(n, ptr, allocate_callback);
+            allocator->alloc_policy::allocate(n, ptr, hint, allocate_callback);
         }
 
         // callback invokes allocate method from next policy
@@ -65,13 +65,13 @@ namespace details
                                          size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint = 0)
         {
             alloc* allocator = static_cast<alloc*>(policy);
-            return policies_list<alloc, alloc_policies>::allocate(allocator, n, ptr, hint);
+            return policies_list<alloc, alloc_policies...>::allocate(allocator, n, ptr, hint);
         }
 
         static void deallocate(alloc* allocator,
                                const pointer& ptr, size_type n)
         {
-            allocator->alloc_policy::deallocate(n, ptr, deallocate_callback);
+            allocator->alloc_policy::deallocate(ptr, n, deallocate_callback);
         }
 
         // callback invokes deallocate method from next policy
@@ -79,7 +79,7 @@ namespace details
                                         const pointer& ptr, size_type n)
         {
             alloc* allocator = static_cast<alloc*>(policy);
-            return policies_list<alloc, alloc_policies>::deallocate(allocator, ptr, n);
+            return policies_list<alloc, alloc_policies...>::deallocate(allocator, ptr, n);
         }
     };
 
@@ -150,12 +150,12 @@ public:
 
     pointer allocate(size_type n, std::allocator<void>::const_pointer hint = 0)
     {
-        return allocate_helper<alloc_policies...>::allocate(*this, n, nullptr, hint);
+        return details::policies_list<allocator, alloc_policies...>::allocate(this, n, nullptr, hint);
     }
 
     void deallocate(const pointer& ptr, size_type n)
     {
-        return allocate_helper<alloc_policies...>::deallocate(*this, ptr, n);
+        return details::policies_list<allocator, alloc_policies...>::deallocate(this, ptr, n);
     }
 
     size_type max_size() const noexcept
