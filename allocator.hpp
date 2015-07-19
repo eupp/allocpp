@@ -11,20 +11,6 @@ namespace alloc_utility
 
 namespace details
 {
-    // conversation from constant to type
-    // will be useful further
-
-    template <bool b>
-    struct bool_to_type
-    {
-        typedef std::true_type type;
-    };
-
-    template <>
-    struct bool_to_type<false>
-    {
-        typedef std::false_type type;
-    };
 
     // helper class for iterate through policies
     // it keeps information about types of policies
@@ -50,17 +36,6 @@ namespace details
                                         typename alloc_policy::template rebind<U>,
                                         typename alloc_policies::template rebind<U>...
                                     >;
-
-
-        pointer allocate(size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint = 0)
-        {
-            return this->base::allocate(n, ptr, hint);
-        }
-
-        void deallocate(const pointer& ptr, size_type n)
-        {
-            this->base::deallocate(ptr, n);
-        }
     };
 
     template <typename alloc_traits>

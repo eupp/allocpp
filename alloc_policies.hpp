@@ -70,8 +70,7 @@ public:
         if (!ptr) {
             res = static_cast<pointer>(::operator new(n * sizeof(value_type), std::nothrow));
         }
-        res = base_policy::allocate(n, res, hint);
-        return res;
+        return base_policy::allocate(n, res, hint);
     }
 
     void deallocate(const pointer& ptr, size_type n)
@@ -114,7 +113,7 @@ public:
         if (!ptr) {
             throw std::bad_alloc();
         }
-        base_policy::allocate(n, ptr, hint);
+        return base_policy::allocate(n, ptr, hint);
     }
 
     void deallocate(const pointer& ptr, size_type n)
@@ -159,8 +158,7 @@ public:
         if (ptr && m_log) {
             *m_log << "Allocate at " << ptr << " " << n * sizeof(value_type) << " bytes" << std::endl;
         }
-        pointer res = base_policy::allocate(n, ptr, hint);
-        return res;
+        return base_policy::allocate(n, ptr, hint);
     }
 
     void deallocate(const pointer& ptr, size_type n)

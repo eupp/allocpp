@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "alloc_traits.hpp"
+#include "alloc_policies.hpp"
 #include "pointer_cast.hpp"
 
 namespace alloc_utility
@@ -36,18 +37,14 @@ public:
 
     static const int CHUNK_SIZE = std::UINT8_MAX;
 
-    chunk(const pointer& chunk_ptr):
-        m_chunk(chunk_ptr)
-      , m_head(0)
-      , m_available(CHUNK_SIZE)
+    chunk()
     {
-        pointer ptr = m_chunk;
-        for (int i = 1; i <= CHUNK_SIZE; ++i, ++ptr) {
-            raw_pointer bytes = pointer_cast_traits<raw_pointer, pointer>::reinterpet_pointer_cast(ptr);
-            bytes[0] = i;
-        }
-        // last block is initialized with CHUNK_SIZE
-        // it is really doesn't matter because when we reach last block m_available == 0
+        set_pointer(pointer(nullptr));
+    }
+
+    chunk(const pointer& chunk_ptr)
+    {
+        set_pointer(chunk_ptr);
     }
 
     pointer get_pointer() const
@@ -55,14 +52,24 @@ public:
         return m_chunk;
     }
 
-    bool is_memory_available() const
+    void set_pointer(pointer ptr)
     {
-        return m_available > 0;
+        m_chunk = ptr;
+        m_head = 0;
+        m_available = CHUNK_SIZE;
+        if (ptr) {
+            for (int i = 1; i <= CHUNK_SIZE; ++i, ++ptr) {
+                raw_pointer bytes = pointer_cast_traits<raw_pointer, pointer>::reinterpet_pointer_cast(ptr);
+                bytes[0] = i;
+            }
+            // last block is initialized with CHUNK_SIZE
+            // it is really doesn't matter because when we reach last block m_available == 0
+        }
     }
 
-    bool is_empty() const
+    bool is_memory_available() const
     {
-        return m_available == CHUNK_SIZE;
+        return m_chunk && (m_available > 0);
     }
 
     bool is_owned(const pointer& ptr) const
@@ -101,8 +108,8 @@ private:
 
 } // namespace details
 
-template <typename T, typename alloc_traits = allocation_traits<T>>
-class pool_allocation_policy
+template <typename T, typename alloc_traits = allocation_traits<T>, typename base_policy = default_allocation_policy<T>>
+class pool_allocation_policy: public base_policy
 {
 public:
 
@@ -116,9 +123,32 @@ public:
     template <typename U>
     using rebind = pool_allocation_policy<U>;
 
-    template <typename allocator>
-    pointer allocate(allocator& alloc,
-                     size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint = nullptr)
+    template <typename policy>
+    using rebind_base = pool_allocation_policy<
+                                                T,
+                                                alloc_traits,
+                                                typename policy::template rebind<T>
+                                              >;
+
+    static const int CHUNK_SIZE = details::chunk::CHUNK_SIZE;
+
+    pool_allocation_policy(size_type n = CHUNK_SIZE):
+        // calculate required number of chunks
+        m_pool((n + CHUNK_SIZE - 1) / CHUNK_SIZE)
+    {
+        for (auto& chunk: m_pool) {
+            chunk.set_pointer(base_policy::allocate(CHUNK_SIZE));
+        }
+    }
+
+    ~pool_allocation_policy()
+    {
+        for (auto& chunk: m_pool) {
+            base_policy::deallocate(chunk.get_pointer(), CHUNK_SIZE);
+        }
+    }
+
+    pointer allocate(size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint = nullptr)
     {
         if (ptr) {
             return ptr;
@@ -131,13 +161,11 @@ public:
                 return chunk.allocate();
             }
         }
-        m_pool.emplace_back(alloc.allocate(details::chunk::CHUNK_SIZE));
+        m_pool.emplace_back(base_policy::allocate(CHUNK_SIZE));
         return m_pool.back().allocate();
     }
 
-    template <typename allocator>
-    void deallocate(allocator& alloc,
-                    const pointer& ptr, size_type n)
+    void deallocate(const pointer& ptr, size_type n)
     {
         if (!ptr) {
             return;
@@ -148,9 +176,6 @@ public:
         for (auto& chunk: m_pool) {
             if (chunk.is_owned(ptr)) {
                 chunk.deallocate(ptr);
-                if (chunk.is_empty()) {
-
-                }
             }
         }
     }
