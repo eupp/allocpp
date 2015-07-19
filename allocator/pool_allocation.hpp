@@ -1,5 +1,5 @@
-#ifndef MEMORY_POOL_HPP
-#define MEMORY_POOL_HPP
+#ifndef POOL_ALLOCATION_HPP
+#define POOL_ALLOCATION_HPP
 
 #include <cstdint>
 #include <vector>
@@ -26,12 +26,6 @@ public:
     typedef typename alloc_traits::difference_type difference_type;
 
     typedef alloc_traits allocation_traits;
-
-    template <typename U>
-    using rebind = chunk<U, typename alloc_traits::template rebind<U>>;
-
-    template <typename U>
-    using rebind_pointer = typename alloc_traits::template rebind_pointer<U>;
 
     typedef rebind_pointer<uint8_t> raw_pointer;
 
@@ -154,7 +148,7 @@ public:
             return ptr;
         }
         if (n > 1) {
-            return alloc.allocate(n, ptr, hint);
+            return base_policy::allocate(n, ptr, hint);
         }
         for (auto& chunk: m_pool) {
             if (chunk.is_memory_available()) {
@@ -171,7 +165,7 @@ public:
             return;
         }
         if (n > 1) {
-            alloc.deallocate(ptr, n);
+            base_policy::deallocate(ptr, n);
         }
         for (auto& chunk: m_pool) {
             if (chunk.is_owned(ptr)) {
@@ -181,9 +175,9 @@ public:
     }
 
 private:
-    std::vector<details::chunk> m_pool;
+    std::vector<details::chunk<T, alloc_traits>> m_pool;
 };
 
 } // namespace alloc_utility
 
-#endif // MEMORY_POOL_HPP
+#endif // POOL_ALLOCATION_HPP
