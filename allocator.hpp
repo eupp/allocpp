@@ -105,7 +105,7 @@ namespace details
         }
     };
 
-}
+} // namespace details
 
 template <typename T, typename alloc_traits, typename... alloc_policies>
 class allocator: public alloc_policies...
@@ -176,6 +176,6 @@ public:
     }
 };
 
-}
+} // namespace alloc_utility
 
 #endif // ALLOCATOR_H
