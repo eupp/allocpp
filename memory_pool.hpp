@@ -20,7 +20,7 @@ public:
 
     typedef T value_type;
     typedef typename alloc_traits::pointer pointer;
-    typedef typename alloc_traits::reference reference;
+    typedef typename alloc_traits::const_pointer const_pointer;
     typedef typename alloc_traits::size_type size_type;
     typedef typename alloc_traits::difference_type difference_type;
 
@@ -93,8 +93,6 @@ public:
     }
 
 private:
-
-
 
     pointer m_chunk;
     std::uint8_t m_head;
