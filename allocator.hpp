@@ -29,77 +29,57 @@ namespace details
     // helper class for iterate through policies
     // it keeps information about types of policies
 
-    template <typename alloc, typename... alloc_policies>
+    template <typename alloc_traits, typename... alloc_policies>
     class policies_list
+    {};
+
+    template <typename alloc_traits, typename alloc_policy, typename... alloc_policies>
+    class policies_list<alloc_traits, alloc_policy, alloc_policies...>
+            : public alloc_policy::template rebind_base<policies_list<alloc_traits, alloc_policies...>>
     {
     public:
 
-        typedef typename alloc::allocation_traits alloc_traits;
         typedef typename alloc_traits::pointer pointer;
         typedef typename alloc_traits::size_type size_type;
 
-        static pointer allocate(alloc* allocator,
-                                size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint = 0);
+        typedef typename alloc_policy::template rebind_base<policies_list<alloc_traits, alloc_policies...>> base;
 
-        static void deallocate(alloc* allocator,
-                               const pointer& ptr, size_type n);
-    };
+        template <typename U>
+        using rebind = policies_list<
+                                        typename alloc_traits::template rebind<U>,
+                                        typename alloc_policy::template rebind<U>,
+                                        typename alloc_policies::template rebind<U>...
+                                    >;
 
-    template <typename alloc, typename alloc_policy, typename... alloc_policies>
-    class policies_list<alloc, alloc_policy, alloc_policies...>
-    {
-    public:
 
-        typedef typename alloc::allocation_traits alloc_traits;
-        typedef typename alloc_traits::pointer pointer;
-        typedef typename alloc_traits::size_type size_type;
-
-        static pointer allocate(alloc* allocator,
-                                size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint = 0)
+        pointer allocate(size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint = 0)
         {
-            allocator->alloc_policy::allocate(n, ptr, hint, allocate_callback);
+            return this->base::allocate(n, ptr, hint);
         }
 
-        // callback invokes allocate method from next policy
-        static pointer allocate_callback(alloc_policy* policy,
-                                         size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint = 0)
+        void deallocate(const pointer& ptr, size_type n)
         {
-            alloc* allocator = static_cast<alloc*>(policy);
-            return policies_list<alloc, alloc_policies...>::allocate(allocator, n, ptr, hint);
-        }
-
-        static void deallocate(alloc* allocator,
-                               const pointer& ptr, size_type n)
-        {
-            allocator->alloc_policy::deallocate(ptr, n, deallocate_callback);
-        }
-
-        // callback invokes deallocate method from next policy
-        static void deallocate_callback(alloc_policy* policy,
-                                        const pointer& ptr, size_type n)
-        {
-            alloc* allocator = static_cast<alloc*>(policy);
-            return policies_list<alloc, alloc_policies...>::deallocate(allocator, ptr, n);
+            this->base::deallocate(ptr, n);
         }
     };
 
-    template <typename alloc>
-    class policies_list<alloc>
+    template <typename alloc_traits>
+    class policies_list<alloc_traits>
     {
     public:
 
-        typedef typename alloc::allocation_traits alloc_traits;
         typedef typename alloc_traits::pointer pointer;
         typedef typename alloc_traits::size_type size_type;
 
-        static pointer allocate(alloc* allocator,
-                                size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint = 0)
+        template <typename U>
+        using rebind = policies_list<typename alloc_traits::template rebind<U>>;
+
+        pointer allocate(size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint = 0)
         {
             return ptr;
         }
 
-        static void deallocate(alloc* allocator,
-                               const pointer& ptr, size_type n)
+        void deallocate(const pointer& ptr, size_type n)
         {
             return;
         }
@@ -108,8 +88,10 @@ namespace details
 } // namespace details
 
 template <typename T, typename alloc_traits, typename... alloc_policies>
-class allocator: public alloc_policies...
+class allocator: public details::policies_list<alloc_traits, alloc_policies...>
 {
+    typedef details::policies_list<alloc_traits, alloc_policies...> base;
+
 public:
 
     static_assert(sizeof...(alloc_policies) > 0,
@@ -150,12 +132,12 @@ public:
 
     pointer allocate(size_type n, std::allocator<void>::const_pointer hint = 0)
     {
-        return details::policies_list<allocator, alloc_policies...>::allocate(this, n, nullptr, hint);
+        return base::allocate(n, nullptr, hint);
     }
 
     void deallocate(const pointer& ptr, size_type n)
     {
-        return details::policies_list<allocator, alloc_policies...>::deallocate(this, ptr, n);
+        base::deallocate(ptr, n);
     }
 
     size_type max_size() const noexcept
