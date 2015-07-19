@@ -6,7 +6,8 @@ CONFIG += c++11
 
 SOURCES += \
     test/smoke_test.cpp \
-    test/policies_test.cpp
+    test/policies_test.cpp \
+    test/pool_test.cpp
 
 HEADERS += \
     allocator.hpp \

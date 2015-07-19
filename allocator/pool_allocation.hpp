@@ -2,6 +2,7 @@
 #define POOL_ALLOCATION_HPP
 
 #include <cstdint>
+#include <limits>
 #include <vector>
 
 #include "alloc_traits.hpp"
@@ -27,9 +28,12 @@ public:
 
     typedef alloc_traits allocation_traits;
 
-    typedef rebind_pointer<uint8_t> raw_pointer;
+    template <typename U>
+    using rebind_pointer = typename alloc_traits::template rebind_pointer<U>;
 
-    static const int CHUNK_SIZE = std::UINT8_MAX;
+    typedef rebind_pointer<std::uint8_t> raw_pointer;
+
+    static const int CHUNK_SIZE = std::numeric_limits<std::uint8_t>::max();
 
     chunk()
     {
@@ -86,10 +90,9 @@ public:
     void deallocate(const pointer& ptr)
     {
         difference_type diff = ptr - m_chunk;
-        raw_pointer head = pointer_cast_traits<raw_pointer, pointer>::reinterpet_pointer_cast(m_chunk + m_head);
-        raw_pointer inserted = pointer_cast_traits<raw_pointer, pointer>::reinterpet_pointer_cast(ptr);
-        inserted[0] = head[0];
-        head[0] = diff;
+        raw_pointer byte = pointer_cast_traits<raw_pointer, pointer>::reinterpet_pointer_cast(ptr);
+        byte[0] = m_head;
+        m_head = diff;
         m_available++;
     }
 
@@ -124,7 +127,7 @@ public:
                                                 typename policy::template rebind<T>
                                               >;
 
-    static const int CHUNK_SIZE = details::chunk::CHUNK_SIZE;
+    static const int CHUNK_SIZE = details::chunk<T, alloc_traits>::CHUNK_SIZE;
 
     pool_allocation_policy(size_type n = CHUNK_SIZE):
         // calculate required number of chunks

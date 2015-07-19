@@ -24,7 +24,7 @@ TEST(smoke_test, test_allocate) {
     const int size = 10;
     int* p = alloc.allocate(size);
 
-    EXPECT_NE(p, nullptr);
+    EXPECT_NE(nullptr, p);
     for (int i = 0; i < size; ++i) {
         p[i] = i;
     }
