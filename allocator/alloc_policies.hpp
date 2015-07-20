@@ -5,6 +5,7 @@
 #include <new>
 
 #include "alloc_traits.hpp"
+#include "macro.hpp"
 
 namespace alloc_utility
 {
@@ -16,7 +17,6 @@ public:
 
     typedef T value_type;
     typedef typename alloc_traits::pointer pointer;
-    typedef typename alloc_traits::const_pointer const_pointer;
     typedef typename alloc_traits::size_type size_type;
 
     typedef alloc_traits allocation_traits;
@@ -43,26 +43,7 @@ class default_allocation_policy: public base_policy
 {
 public:
 
-    typedef T value_type;
-    typedef typename alloc_traits::pointer pointer;
-    typedef typename alloc_traits::const_pointer const_pointer;
-    typedef typename alloc_traits::size_type size_type;
-
-    typedef alloc_traits allocation_traits;
-
-    template <typename U>
-    using rebind = default_allocation_policy<
-                                                U,
-                                                typename alloc_traits::template rebind<U>,
-                                                typename base_policy::template rebind<U>
-                                            >;
-
-    template <typename policy>
-    using rebind_base = default_allocation_policy<
-                                                    T,
-                                                    alloc_traits,
-                                                    typename policy::template rebind<T>
-                                                 >;
+    DECLARE_ALLOC_POLICY_WT(default_allocation_policy, base_policy, T, alloc_traits)
 
     pointer allocate(size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint)
     {
@@ -86,27 +67,7 @@ class throw_bad_alloc_policy: public base_policy
 {
 public:
 
-    typedef T value_type;
-    typedef typename alloc_traits::pointer pointer;
-    typedef typename alloc_traits::const_pointer const_pointer;
-    typedef typename alloc_traits::size_type size_type;
-
-    typedef alloc_traits allocation_traits;
-
-    template <typename U>
-    using rebind = throw_bad_alloc_policy<
-                                            U,
-                                            typename alloc_traits::template rebind<U>,
-                                            typename base_policy::template rebind<U>
-                                         >;
-
-
-    template <typename policy>
-    using rebind_base = throw_bad_alloc_policy<
-                                                T,
-                                                alloc_traits,
-                                                typename policy::template rebind<T>
-                                              >;
+    DECLARE_ALLOC_POLICY_WT(throw_bad_alloc_policy, base_policy, T, alloc_traits)
 
     pointer allocate(size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint)
     {
@@ -127,27 +88,7 @@ class logging_policy: public base_policy
 {
 public:
 
-    typedef T value_type;
-    typedef typename alloc_traits::pointer pointer;
-    typedef typename alloc_traits::const_pointer const_pointer;
-    typedef typename alloc_traits::size_type size_type;
-
-    typedef alloc_traits allocation_traits;
-
-    template <typename U>
-    using rebind = logging_policy<
-                                    U,
-                                    typename alloc_traits::template rebind<U>,
-                                    typename base_policy::template rebind<U>
-                                 >;
-
-
-    template <typename policy>
-    using rebind_base = logging_policy<
-                                        T,
-                                        alloc_traits,
-                                        typename policy::template rebind<T>
-                                      >;
+    DECLARE_ALLOC_POLICY_WT(logging_policy, base_policy, T, alloc_traits)
 
     logging_policy(std::ostream* log = nullptr):
         m_log(log)

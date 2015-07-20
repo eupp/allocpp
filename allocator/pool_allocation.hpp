@@ -4,10 +4,12 @@
 #include <cstdint>
 #include <limits>
 #include <vector>
+#include <memory>
 
 #include "alloc_traits.hpp"
 #include "alloc_policies.hpp"
 #include "pointer_cast.hpp"
+#include "macro.hpp"
 
 namespace alloc_utility
 {
@@ -20,13 +22,7 @@ class chunk
 {
 public:
 
-    typedef T value_type;
-    typedef typename alloc_traits::pointer pointer;
-    typedef typename alloc_traits::const_pointer const_pointer;
-    typedef typename alloc_traits::size_type size_type;
-    typedef typename alloc_traits::difference_type difference_type;
-
-    typedef alloc_traits allocation_traits;
+    DECLARE_ALLOC_TRAITS(T, alloc_traits)
 
     template <typename U>
     using rebind_pointer = typename alloc_traits::template rebind_pointer<U>;
@@ -40,10 +36,15 @@ public:
         set_pointer(pointer(nullptr));
     }
 
-    chunk(const pointer& chunk_ptr)
+    explicit chunk(const pointer& chunk_ptr)
     {
         set_pointer(chunk_ptr);
     }
+
+    chunk(const chunk&) = delete;
+    chunk(chunk&&) = delete;
+    chunk& operator=(const chunk&) = delete;
+    chunk& operator=(chunk&&) = delete;
 
     pointer get_pointer() const
     {
@@ -103,47 +104,36 @@ private:
     std::uint8_t m_available;
 };
 
-} // namespace details
-
-template <typename T, typename alloc_traits = allocation_traits<T>, typename base_policy = default_allocation_policy<T>>
-class pool_allocation_policy: public base_policy
+template <typename T, typename allocator, typename alloc_traits = allocation_traits<T>>
+class memory_pool
 {
 public:
 
-    typedef T value_type;
-    typedef typename alloc_traits::pointer pointer;
-    typedef typename alloc_traits::const_pointer const_pointer;
-    typedef typename alloc_traits::size_type size_type;
+    DECLARE_ALLOC_TRAITS(T, alloc_traits)
 
-    typedef alloc_traits allocation_traits;
+    static const int CHUNK_SIZE = chunk<T, alloc_traits>::CHUNK_SIZE;
 
-    template <typename U>
-    using rebind = pool_allocation_policy<U>;
-
-    template <typename policy>
-    using rebind_base = pool_allocation_policy<
-                                                T,
-                                                alloc_traits,
-                                                typename policy::template rebind<T>
-                                              >;
-
-    static const int CHUNK_SIZE = details::chunk<T, alloc_traits>::CHUNK_SIZE;
-
-    pool_allocation_policy(size_type n = CHUNK_SIZE):
+    memory_pool(allocator* alloc, size_type n = CHUNK_SIZE):
         // calculate required number of chunks
         m_pool((n + CHUNK_SIZE - 1) / CHUNK_SIZE)
+      , m_alloc(alloc)
     {
         for (auto& chunk: m_pool) {
-            chunk.set_pointer(base_policy::allocate(CHUNK_SIZE));
+            chunk.set_pointer(m_alloc->allocate(CHUNK_SIZE));
         }
     }
 
-    ~pool_allocation_policy()
+    ~memory_pool()
     {
         for (auto& chunk: m_pool) {
-            base_policy::deallocate(chunk.get_pointer(), CHUNK_SIZE);
+            m_alloc->deallocate(chunk.get_pointer(), CHUNK_SIZE);
         }
     }
+
+    memory_pool(const chunk&) = delete;
+    memory_pool(chunk&&) = delete;
+    memory_pool& operator=(const memory_pool&) = delete;
+    memory_pool& operator=(memory_pool&&) = delete;
 
     pointer allocate(size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint = nullptr)
     {
@@ -151,14 +141,14 @@ public:
             return ptr;
         }
         if (n > 1) {
-            return base_policy::allocate(n, ptr, hint);
+            return m_alloc->allocate(n, ptr, hint);
         }
         for (auto& chunk: m_pool) {
             if (chunk.is_memory_available()) {
                 return chunk.allocate();
             }
         }
-        m_pool.emplace_back(base_policy::allocate(CHUNK_SIZE));
+        m_pool.emplace_back(m_alloc->allocate(CHUNK_SIZE));
         return m_pool.back().allocate();
     }
 
@@ -168,7 +158,7 @@ public:
             return;
         }
         if (n > 1) {
-            base_policy::deallocate(ptr, n);
+            m_alloc->deallocate(ptr, n);
         }
         for (auto& chunk: m_pool) {
             if (chunk.is_owned(ptr)) {
@@ -179,6 +169,48 @@ public:
 
 private:
     std::vector<details::chunk<T, alloc_traits>> m_pool;
+    allocator* m_alloc;
+};
+
+} // namespace details
+
+template <typename T, typename alloc_traits = allocation_traits<T>, typename base_policy = default_allocation_policy<T>>
+class pool_allocation_policy: public base_policy
+{
+    typedef details::memory_pool<T, base_policy, alloc_traits> pool_type;
+
+public:
+
+    DECLARE_ALLOC_POLICY_WT(pool_allocation_policy, base_policy, T, alloc_traits)
+
+    static const int CHUNK_SIZE = details::memory_pool<T, alloc_traits>::CHUNK_SIZE;
+
+    explicit pool_allocation_policy(size_type n = CHUNK_SIZE):
+        // calculate required number of chunks
+        m_pool(std::make_shared<pool_type>(this, n))
+    {}
+
+    template <typename U>
+    pool_allocation_policy(const pool_allocation_policy::rebind<U>& other):
+        pool_allocation_policy(pool_allocation_policy())
+    {}
+
+    pool_allocation_policy& operator=(const pool_allocation_policy&) = delete;
+    pool_allocation_policy& operator=(pool_allocation_policy&&) = delete;
+
+
+    pointer allocate(size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint = nullptr)
+    {
+        return m_pool->allocate(n, ptr, hint);
+    }
+
+    void deallocate(const pointer& ptr, size_type n)
+    {
+        m_pool->deallocate(ptr, n);
+    }
+
+private:
+    std::shared_ptr<pool_type> m_pool;
 };
 
 } // namespace alloc_utility
