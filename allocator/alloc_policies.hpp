@@ -45,7 +45,7 @@ public:
 
     DECLARE_ALLOC_POLICY_WT(default_allocation_policy, base_policy, T, alloc_traits)
 
-    pointer allocate(size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint)
+    pointer allocate(size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint = 0)
     {
         pointer res = ptr;
         if (!ptr) {

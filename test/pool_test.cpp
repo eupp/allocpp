@@ -54,7 +54,7 @@ TEST_F(chunk_test, test_is_owned)
 {
     EXPECT_TRUE(chk.is_owned(mem));
     EXPECT_FALSE(chk.is_owned(mem + CHUNK_SIZE + 10));
-    EXPECT_FALSE(chk.is_owned(mem - 10));
+    EXPECT_FALSE(chk.is_owned(mem - 1));
     EXPECT_FALSE(chk.is_owned(nullptr));
 }
 
@@ -63,15 +63,18 @@ TEST_F(chunk_test, test_allocate)
     int* ptr1 = chk.allocate();
     EXPECT_NE(nullptr, ptr1);
     EXPECT_TRUE(chk.is_owned(ptr1));
+    // try dereference pointer
+    // in case of incorrect allocation it might cause segmentation fault
+    *ptr1 = 42;
 
     int* ptr2 = chk.allocate();
     EXPECT_NE(nullptr, ptr2);
+    EXPECT_NE(ptr1, ptr2);
     EXPECT_TRUE(chk.is_owned(ptr2));
+    *ptr2 = 42;
 
     for (int i = 0; i < CHUNK_SIZE - 2; ++i) {
         int* ptr3 = chk.allocate();
-        // try dereference pointer
-        // in case of incorrect allocation it might cause segmentation fault
         *ptr3 = 42;
     }
 
@@ -114,4 +117,47 @@ TEST_F(chunk_test, test_stress)
             ASSERT_TRUE(chk.is_memory_available());
         }
     }
+}
+
+class memory_pool_test: public ::testing::Test
+{
+public:
+
+    typedef default_allocation_policy<int> default_policy;
+    typedef details::memory_pool<int, default_policy> pool_type;
+
+    static const int CHUNK_SIZE = chunk<int>::CHUNK_SIZE;
+
+    memory_pool_test():
+        pool(&alloc)
+    {}
+
+    default_policy alloc;
+    pool_type pool;
+};
+
+TEST_F(memory_pool_test, test_allocate)
+{
+    int* ptr1 = pool.allocate(1, nullptr);
+    EXPECT_NE(nullptr, ptr1);
+    // try dereference pointer
+    // in case of incorrect allocation it might cause segmentation fault
+    *ptr1 = 42;
+
+    for (int i = 0; i < CHUNK_SIZE - 1; ++i) {
+        int* ptr2 = pool.allocate(1, nullptr);
+        *ptr2 = 42;
+    }
+
+    int* ptr3 = pool.allocate(1, nullptr);
+    EXPECT_NE(nullptr, ptr3);
+    *ptr3 = 42;
+
+    int* ptr4 = pool.allocate(1, ptr3);
+    EXPECT_EQ(ptr3, ptr4);
+
+    int* ptr5 = pool.allocate(2, nullptr);
+    EXPECT_NE(nullptr, ptr5);
+    ptr5[0] = ptr5[1] = 42;
+    alloc.deallocate(ptr5, 2);
 }

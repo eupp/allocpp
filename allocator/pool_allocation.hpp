@@ -2,6 +2,7 @@
 #define POOL_ALLOCATION_HPP
 
 #include <cstdint>
+#include <cassert>
 #include <limits>
 #include <vector>
 #include <memory>
@@ -41,8 +42,13 @@ public:
         set_pointer(chunk_ptr);
     }
 
+    chunk(chunk&& other) noexcept:
+        m_chunk(other.m_chunk)
+      , m_head(other.m_head)
+      , m_available(other.m_available)
+    {}
+
     chunk(const chunk&) = delete;
-    chunk(chunk&&) = delete;
     chunk& operator=(const chunk&) = delete;
     chunk& operator=(chunk&&) = delete;
 
@@ -118,8 +124,9 @@ public:
         m_pool((n + CHUNK_SIZE - 1) / CHUNK_SIZE)
       , m_alloc(alloc)
     {
+        assert(alloc);
         for (auto& chunk: m_pool) {
-            chunk.set_pointer(m_alloc->allocate(CHUNK_SIZE));
+            chunk.set_pointer(m_alloc->allocate(CHUNK_SIZE, pointer(nullptr)));
         }
     }
 
@@ -130,8 +137,8 @@ public:
         }
     }
 
-    memory_pool(const chunk&) = delete;
-    memory_pool(chunk&&) = delete;
+    memory_pool(const memory_pool&) = delete;
+    memory_pool(memory_pool&&) = delete;
     memory_pool& operator=(const memory_pool&) = delete;
     memory_pool& operator=(memory_pool&&) = delete;
 
@@ -148,7 +155,7 @@ public:
                 return chunk.allocate();
             }
         }
-        m_pool.emplace_back(m_alloc->allocate(CHUNK_SIZE));
+        m_pool.emplace_back(m_alloc->allocate(CHUNK_SIZE, pointer(nullptr)));
         return m_pool.back().allocate();
     }
 
