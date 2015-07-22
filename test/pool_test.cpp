@@ -11,6 +11,26 @@
 using namespace alloc_utility;
 using alloc_utility::details::chunk;
 
+class bernulli_generator
+{
+public:
+
+    explicit bernulli_generator(double p = 0.5):
+        m_eng(std::random_device().operator()())
+      , m_distr(p)
+    {}
+
+    bool operator()()
+    {
+        return m_distr(m_eng);
+    }
+
+private:
+
+    std::default_random_engine m_eng;
+    std::bernoulli_distribution m_distr;
+};
+
 class chunk_test: public ::testing::Test
 {
 public:
@@ -20,12 +40,8 @@ public:
     chunk_test():
         mem(new int[CHUNK_SIZE])
       , chk(mem)
-    {
-        std::random_device dev;
-        std::default_random_engine eng(dev());
-        std::bernoulli_distribution distr(0.75);
-        rand = [eng, distr] () mutable {return distr(eng); };
-    }
+      , rand(0.75)
+    {}
 
     ~chunk_test()
     {
@@ -34,7 +50,7 @@ public:
 
     int* mem;
     chunk<int> chk;
-    std::function<bool()> rand;
+    bernulli_generator rand;
 };
 
 TEST_F(chunk_test, test_is_memory_available)
@@ -108,8 +124,7 @@ TEST_F(chunk_test, test_stress)
             // in case of incorrect allocation it might cause segmentation fault
             *ptr = 42;
             st.push(ptr);
-        }
-        else if (!st.empty()) {
+        } else if (!st.empty()) {
             int* ptr = st.top();
             st.pop();
             ASSERT_TRUE(chk.is_owned(ptr));
@@ -130,10 +145,12 @@ public:
 
     memory_pool_test():
         pool(&alloc)
+      , rand(0.75)
     {}
 
     default_policy alloc;
     pool_type pool;
+    bernulli_generator rand;
 };
 
 TEST_F(memory_pool_test, test_allocate)
@@ -160,4 +177,35 @@ TEST_F(memory_pool_test, test_allocate)
     EXPECT_NE(nullptr, ptr5);
     ptr5[0] = ptr5[1] = 42;
     alloc.deallocate(ptr5, 2);
+}
+
+TEST_F(memory_pool_test, test_deallocate)
+{
+    int* ptr1 = pool.allocate(1, nullptr);
+    pool.deallocate(ptr1, 1);
+
+    int* ptr2 = pool.allocate(2, nullptr);
+    pool.deallocate(ptr2, 2);
+
+    pool.deallocate(nullptr, 1);
+}
+
+TEST_F(memory_pool_test, test_stress)
+{
+    const int ITER_COUNT = 2000;
+    std::stack<int*> st;
+    for (int i = 0; i < ITER_COUNT; ++i) {
+        if (rand()) {
+            int* ptr = pool.allocate(1, nullptr);
+            ASSERT_NE(nullptr, ptr);
+            // try dereference pointer
+            // in case of incorrect allocation it might cause segmentation fault
+            *ptr = 42;
+            st.push(ptr);
+        } else {
+            int* ptr = st.top();
+            st.pop();
+            pool.deallocate(ptr, 1);
+        }
+    }
 }
