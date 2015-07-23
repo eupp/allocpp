@@ -142,7 +142,7 @@ public:
     memory_pool& operator=(const memory_pool&) = delete;
     memory_pool& operator=(memory_pool&&) = delete;
 
-    pointer allocate(size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint = nullptr)
+    pointer allocate(size_type n, const pointer& ptr, const_void_pointer hint = nullptr)
     {
         if (ptr) {
             return ptr;
@@ -206,7 +206,7 @@ public:
     pool_allocation_policy& operator=(pool_allocation_policy&&) = delete;
 
 
-    pointer allocate(size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint = nullptr)
+    pointer allocate(size_type n, const pointer& ptr, const_void_pointer hint = nullptr)
     {
         return m_pool->allocate(n, ptr, hint);
     }

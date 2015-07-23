@@ -202,7 +202,7 @@ TEST_F(memory_pool_test, test_stress)
             // in case of incorrect allocation it might cause segmentation fault
             *ptr = 42;
             st.push(ptr);
-        } else {
+        } else if (!st.empty()) {
             int* ptr = st.top();
             st.pop();
             pool.deallocate(ptr, 1);

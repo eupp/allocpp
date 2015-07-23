@@ -17,6 +17,7 @@ public:
 
     typedef T value_type;
     typedef typename alloc_traits::pointer pointer;
+    typedef typename alloc_traits::const_void_pointer const_void_pointer;
     typedef typename alloc_traits::size_type size_type;
 
     typedef alloc_traits allocation_traits;
@@ -27,13 +28,17 @@ public:
     template <typename policy>
     using rebind_base = none_policy<T, alloc_traits>;
 
-    pointer allocate(size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint)
+    pointer allocate(size_type n, const pointer& ptr, const_void_pointer hint = nullptr)
     {
+        ALLOC_UNUSED(n);
+        ALLOC_UNUSED(hint);
         return ptr;
     }
 
     void deallocate(const pointer& ptr, size_type n)
     {
+        ALLOC_UNUSED(ptr);
+        ALLOC_UNUSED(n);
         return;
     }
 };
@@ -45,7 +50,7 @@ public:
 
     DECLARE_ALLOC_POLICY_WT(default_allocation_policy, base_policy, T, alloc_traits)
 
-    pointer allocate(size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint = 0)
+    pointer allocate(size_type n, const pointer& ptr, const_void_pointer hint = nullptr)
     {
         pointer res = ptr;
         if (!ptr) {
@@ -69,7 +74,7 @@ public:
 
     DECLARE_ALLOC_POLICY_WT(throw_bad_alloc_policy, base_policy, T, alloc_traits)
 
-    pointer allocate(size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint)
+    pointer allocate(size_type n, const pointer& ptr, const_void_pointer hint = nullptr)
     {
         if (!ptr) {
             throw std::bad_alloc();
@@ -94,7 +99,7 @@ public:
         m_log(log)
     {}
 
-    pointer allocate(size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint)
+    pointer allocate(size_type n, const pointer& ptr, const_void_pointer hint = nullptr)
     {
         if (ptr && m_log) {
             *m_log << "Allocate at " << ptr << " " << n * sizeof(value_type) << " bytes" << std::endl;

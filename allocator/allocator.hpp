@@ -5,6 +5,7 @@
 #include <type_traits>
 
 #include "alloc_traits.hpp"
+#include "macro.hpp"
 
 namespace alloc_utility
 {
@@ -51,11 +52,15 @@ namespace details
 
         pointer allocate(size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint = 0)
         {
+            ALLOC_UNUSED(n);
+            ALLOC_UNUSED(hint);
             return ptr;
         }
 
         void deallocate(const pointer& ptr, size_type n)
         {
+            ALLOC_UNUSED(ptr);
+            ALLOC_UNUSED(n);
             return;
         }
     };
@@ -72,15 +77,8 @@ public:
     static_assert(sizeof...(alloc_policies) > 0,
                   "Allocator needs at least one allocation policy");
 
-    typedef T value_type;
-    typedef typename alloc_traits::pointer pointer;
-    typedef typename alloc_traits::reference reference;
-    typedef typename alloc_traits::const_pointer const_pointer;
-    typedef typename alloc_traits::const_reference const_reference;
-    typedef typename alloc_traits::size_type size_type;
-    typedef typename alloc_traits::difference_type difference_type;
-
-    typedef alloc_traits allocation_traits;
+    DECLARE_ALLOC_TRAITS(T, alloc_traits)
+    DECLARE_REBIND_POINTERS(alloc_traits)
 
     template <typename U>
     struct rebind
@@ -92,9 +90,6 @@ public:
                          > other;
     };
 
-    template <typename U>
-    using rebind_pointer = typename alloc_traits::template rebind_pointer<U>;
-
     pointer address(reference ref) const noexcept
     {
         return alloc_traits::address(ref);
@@ -105,7 +100,7 @@ public:
         return alloc_traits::address(ref);
     }
 
-    pointer allocate(size_type n, std::allocator<void>::const_pointer hint = 0)
+    pointer allocate(size_type n, const_void_pointer hint = nullptr)
     {
         return base::allocate(n, nullptr, hint);
     }

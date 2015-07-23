@@ -14,10 +14,23 @@ class allocation_traits
 {
 public:
 
+
     typedef T value_type;
+
     typedef typename std::add_pointer<T>::type pointer;
-    typedef typename std::add_lvalue_reference<T>::type reference;
     typedef typename std::add_pointer<typename std::add_const<T>::type>::type const_pointer;
+
+    template <typename U>
+    using rebind_pointer = typename std::pointer_traits<pointer>::template rebind<U>;
+
+    template <typename U>
+    using rebind_const_pointer =
+        typename std::pointer_traits<const_pointer>::template rebind<typename std::add_const<U>::type>;
+
+    typedef rebind_pointer<void> void_pointer;
+    typedef rebind_const_pointer<void> const_void_pointer;
+
+    typedef typename std::add_lvalue_reference<T>::type reference;
     typedef typename std::add_lvalue_reference<typename std::add_const<T>::type>::type const_reference;
     typedef size_t size_type;
     typedef typename std::pointer_traits<pointer>::difference_type difference_type;
@@ -25,8 +38,6 @@ public:
     template <typename U>
     using rebind = allocation_traits<U>;
 
-    template <typename U>
-    using rebind_pointer = typename std::pointer_traits<pointer>::template rebind<U>;
 
     static pointer address(reference ref) noexcept
     {
@@ -42,7 +53,6 @@ public:
     {
         return std::numeric_limits<size_type>::max();
     }
-
 
     template <typename U, typename... Args>
     static void construct(rebind_pointer<U> p, Args&&... args)
