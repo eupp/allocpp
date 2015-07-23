@@ -20,7 +20,8 @@ HEADERS += \
     allocator/alloc_traits.hpp \
     allocator/pointer_cast.hpp \
     allocator/pool_allocation.hpp \
-    allocator/macro.hpp
+    allocator/macro.hpp \
+    allocator/statistic_policy.hpp
 
 INCLUDEPATH += allocator
 
