@@ -37,15 +37,16 @@ public:
         set_pointer(pointer(nullptr));
     }
 
-    explicit chunk(const pointer& chunk_ptr)
+    explicit chunk(const pointer& chunk_ptr, bool delete_flag = true)
     {
-        set_pointer(chunk_ptr);
+        set_pointer(chunk_ptr, delete_flag);
     }
 
     chunk(chunk&& other) noexcept:
         m_chunk(other.m_chunk)
       , m_head(other.m_head)
       , m_available(other.m_available)
+      , m_delete_flag(other.delete_flag())
     {}
 
     chunk(const chunk&) = delete;
@@ -57,11 +58,12 @@ public:
         return m_chunk;
     }
 
-    void set_pointer(pointer ptr)
+    void set_pointer(pointer ptr, bool delete_flag = true)
     {
         m_chunk = ptr;
         m_head = 0;
         m_available = CHUNK_SIZE;
+        m_delete_flag = delete_flag;
         if (ptr) {
             for (int i = 1; i <= CHUNK_SIZE; ++i, ++ptr) {
                 raw_pointer bytes = pointer_cast_traits<raw_pointer, pointer>::reinterpet_pointer_cast(ptr);
@@ -80,6 +82,11 @@ public:
     bool is_owned(const pointer& ptr) const
     {
         return m_chunk && (m_chunk <= ptr) && (ptr < m_chunk + CHUNK_SIZE);
+    }
+
+    bool delete_flag() const
+    {
+        return m_delete_flag;
     }
 
     pointer allocate()
@@ -108,6 +115,7 @@ private:
     pointer m_chunk;
     std::uint8_t m_head;
     std::uint8_t m_available;
+    bool m_delete_flag;
 };
 
 template <typename T, typename allocator, typename alloc_traits = allocation_traits<T>>
@@ -129,7 +137,9 @@ public:
     ~memory_pool()
     {
         for (auto& chunk: m_pool) {
-            m_alloc->deallocate(chunk.get_pointer(), CHUNK_SIZE);
+            if (chunk.delete_flag()) {
+                m_alloc->deallocate(chunk.get_pointer(), CHUNK_SIZE);
+            }
         }
     }
 
@@ -138,28 +148,31 @@ public:
     memory_pool& operator=(const memory_pool&) = delete;
     memory_pool& operator=(memory_pool&&) = delete;
 
-    void reserve(size_type size)
+    size_type size() const
     {
-        size_type curr_size = CHUNK_SIZE * m_pool.size();
-        if (size <= curr_size) {
+        return CHUNK_SIZE * m_pool.size();
+    }
+
+    void reserve(size_type new_size)
+    {
+        if (new_size <= size()) {
             return;
         }
         int old_chunks_count = m_pool.size();
-        int chunks_count = (size + CHUNK_SIZE - 1) / CHUNK_SIZE;
+        int chunks_count = (new_size + CHUNK_SIZE - 1) / CHUNK_SIZE;
+        int chunks_diff = chunks_count - old_chunks_count;
         m_pool.resize(chunks_count);
-        for (int i = old_chunks_count; i < chunks_count; ++i) {
-            m_pool[i].set_pointer(m_alloc->allocate(CHUNK_SIZE, pointer(nullptr)));
+        pointer ptr = m_alloc->allocate(chunks_diff * CHUNK_SIZE, pointer(nullptr));
+        int i = old_chunks_count;
+        m_pool[i++].set_pointer(ptr, true);
+        for (; i < chunks_count; ++i, ptr += CHUNK_SIZE) {
+            m_pool[i].set_pointer(ptr, false);
         }
     }
 
-    pointer allocate(size_type n, const pointer& ptr, const_void_pointer hint = nullptr)
+    pointer allocate(const const_void_pointer& hint = nullptr)
     {
-        if (ptr) {
-            return ptr;
-        }
-        if (n > 1) {
-            return m_alloc->allocate(n, ptr, hint);
-        }
+        ALLOC_UNUSED(hint);
         for (auto& chunk: m_pool) {
             if (chunk.is_memory_available()) {
                 return chunk.allocate();
@@ -169,14 +182,8 @@ public:
         return m_pool.back().allocate();
     }
 
-    void deallocate(const pointer& ptr, size_type n)
+    void deallocate(const pointer& ptr)
     {
-        if (!ptr) {
-            return;
-        }
-        if (n > 1) {
-            m_alloc->deallocate(ptr, n);
-        }
         for (auto& chunk: m_pool) {
             if (chunk.is_owned(ptr)) {
                 chunk.deallocate(ptr);
@@ -200,8 +207,6 @@ public:
 
     DECLARE_ALLOC_POLICY_WT(pool_allocation_policy, base_policy, T, alloc_traits)
 
-    static const int CHUNK_SIZE = details::memory_pool<T, alloc_traits>::CHUNK_SIZE;
-
     explicit pool_allocation_policy():
         // calculate required number of chunks
         m_pool(std::make_shared<pool_type>(this))
@@ -215,15 +220,33 @@ public:
     pool_allocation_policy& operator=(const pool_allocation_policy&) = delete;
     pool_allocation_policy& operator=(pool_allocation_policy&&) = delete;
 
-
-    pointer allocate(size_type n, const pointer& ptr, const_void_pointer hint = nullptr)
+    size_type size() const
     {
-        return m_pool->allocate(n, ptr, hint);
+        return m_pool->size();
+    }
+
+    void reserve(size_type new_size)
+    {
+        m_pool->reserve(new_size);
+    }
+
+    pointer allocate(size_type n, const pointer& ptr, const const_void_pointer& hint = nullptr)
+    {
+        if (ptr) {
+            return ptr;
+        }
+        if (n > 1) {
+            return base_policy::allocate(n, ptr, hint);
+        }
+        return m_pool->allocate(hint);
     }
 
     void deallocate(const pointer& ptr, size_type n)
     {
-        m_pool->deallocate(ptr, n);
+        if (n > 1) {
+            base_policy::deallocate(ptr, n);
+        }
+        m_pool->deallocate(ptr);
     }
 
 private:

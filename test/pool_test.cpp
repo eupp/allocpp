@@ -138,56 +138,91 @@ class memory_pool_test: public ::testing::Test
 {
 public:
 
-    typedef default_allocation_policy<int> default_policy;
-    typedef details::memory_pool<int, default_policy> pool_type;
+    typedef default_allocation_policy<int, allocation_traits<int>, statistic_policy<int>> alloc_policy;
+    typedef details::memory_pool<int, alloc_policy> pool_type;
+    typedef typename alloc_policy::statistic_type statistic;
 
-    static const int CHUNK_SIZE = chunk<int>::CHUNK_SIZE;
+    static const int CHUNK_SIZE = pool_type::CHUNK_SIZE;
 
     memory_pool_test():
         pool(&alloc)
       , rand(0.75)
-    {}
+    {
+        alloc.set_statistic(&stat);
+    }
 
-    default_policy alloc;
+    statistic stat;
+    alloc_policy alloc;
     pool_type pool;
     bernulli_generator rand;
 };
 
 TEST_F(memory_pool_test, test_allocate)
 {
-    int* ptr1 = pool.allocate(1, nullptr);
+    int* ptr1 = pool.allocate();
     EXPECT_NE(nullptr, ptr1);
     // try dereference pointer
     // in case of incorrect allocation it might cause segmentation fault
     *ptr1 = 42;
+    EXPECT_EQ(1, stat.allocs_count());
+    EXPECT_EQ(1, stat.allocated_blocks_count());
+    EXPECT_EQ(CHUNK_SIZE * sizeof(int), stat.mem_used());
 
     for (int i = 0; i < CHUNK_SIZE - 1; ++i) {
-        int* ptr2 = pool.allocate(1, nullptr);
+        int* ptr2 = pool.allocate();
         *ptr2 = 42;
+        EXPECT_EQ(1, stat.allocs_count());
+        EXPECT_EQ(1, stat.allocated_blocks_count());
+        EXPECT_EQ(CHUNK_SIZE * sizeof(int), stat.mem_used());
     }
 
-    int* ptr3 = pool.allocate(1, nullptr);
+    int* ptr3 = pool.allocate();
     EXPECT_NE(nullptr, ptr3);
+    EXPECT_NE(ptr1, ptr3);
     *ptr3 = 42;
-
-    int* ptr4 = pool.allocate(1, ptr3);
-    EXPECT_EQ(ptr3, ptr4);
-
-    int* ptr5 = pool.allocate(2, nullptr);
-    EXPECT_NE(nullptr, ptr5);
-    ptr5[0] = ptr5[1] = 42;
-    alloc.deallocate(ptr5, 2);
+    EXPECT_EQ(2, stat.allocs_count());
+    EXPECT_EQ(2, stat.allocated_blocks_count());
+    EXPECT_EQ(2 * CHUNK_SIZE * sizeof(int), stat.mem_used());
 }
 
 TEST_F(memory_pool_test, test_deallocate)
 {
-    int* ptr1 = pool.allocate(1, nullptr);
-    pool.deallocate(ptr1, 1);
+    int* ptr1 = pool.allocate();
+    pool.deallocate(ptr1);
+    EXPECT_EQ(0, stat.deallocs_count());
+    EXPECT_EQ(1, stat.allocated_blocks_count());
+    EXPECT_EQ(CHUNK_SIZE * sizeof(int), stat.mem_used());
+}
 
-    int* ptr2 = pool.allocate(2, nullptr);
-    pool.deallocate(ptr2, 2);
+TEST_F(memory_pool_test, test_size)
+{
+    EXPECT_EQ(pool.size(), 0);
+    for (int i = 0; i < 4 * CHUNK_SIZE; ++i) {
+        pool.allocate();
+    }
+    pool.allocate();
+    EXPECT_EQ(5 * CHUNK_SIZE, pool.size());
+}
 
-    pool.deallocate(nullptr, 1);
+TEST_F(memory_pool_test, test_reserve)
+{
+    pool.reserve(2 * CHUNK_SIZE);
+    EXPECT_EQ(2 * CHUNK_SIZE, pool.size());
+    for (int i = 0; i < 2 * CHUNK_SIZE; ++i) {
+        int* ptr = pool.allocate();
+        EXPECT_NE(nullptr, ptr);
+        *ptr = 42;
+    }
+
+    pool.reserve(CHUNK_SIZE);
+    EXPECT_EQ(2 * CHUNK_SIZE, pool.size());
+
+    int* ptr = pool.allocate();
+    *ptr = 42;
+    pool.reserve(5 * CHUNK_SIZE);
+    EXPECT_EQ(5 * CHUNK_SIZE, pool.size());
+    // check old memory is valid
+    EXPECT_EQ(42, *ptr);
 }
 
 TEST_F(memory_pool_test, test_stress)
@@ -196,7 +231,7 @@ TEST_F(memory_pool_test, test_stress)
     std::stack<int*> st;
     for (int i = 0; i < ITER_COUNT; ++i) {
         if (rand()) {
-            int* ptr = pool.allocate(1, nullptr);
+            int* ptr = pool.allocate();
             ASSERT_NE(nullptr, ptr);
             // try dereference pointer
             // in case of incorrect allocation it might cause segmentation fault
@@ -205,7 +240,7 @@ TEST_F(memory_pool_test, test_stress)
         } else if (!st.empty()) {
             int* ptr = st.top();
             st.pop();
-            pool.deallocate(ptr, 1);
+            pool.deallocate(ptr);
         }
     }
 }
@@ -219,9 +254,10 @@ public:
                                             statistic_policy<int>
                                         >
                                   > allocator;
+    typedef details::memory_pool<int, allocator> pool_type;
     typedef typename allocator::statistic_type statistic;
 
-    static const int CHUNK_SIZE = allocator::CHUNK_SIZE;
+    static const int CHUNK_SIZE = pool_type::CHUNK_SIZE;
 
     pool_allocation_policy_test()
     {
@@ -236,21 +272,42 @@ TEST_F(pool_allocation_policy_test, test_allocate)
 {
     int* ptr1 = alloc.allocate(1, nullptr);
     EXPECT_NE(nullptr, ptr1);
+    // try dereference pointer
+    // in case of incorrect allocation it might cause segmentation fault
     *ptr1 = 42;
-    int* ptr2 = alloc.allocate(1, nullptr);
-    EXPECT_NE(nullptr, ptr2);
-    *ptr2 = 42;
     EXPECT_EQ(1, stat.allocs_count());
     EXPECT_EQ(1, stat.allocated_blocks_count());
     EXPECT_EQ(CHUNK_SIZE * sizeof(int), stat.mem_used());
 
-    int* ptr3 = alloc.allocate(2, nullptr);
-    EXPECT_NE(nullptr, ptr3);
-    ptr3[0] = 42;
-    ptr3[1] = 42;
+    int* ptr2 = alloc.allocate(2, nullptr);
+    EXPECT_NE(nullptr, ptr2);
+    ptr2[0] = ptr2[1] = 42;
     EXPECT_EQ(2, stat.allocs_count());
     EXPECT_EQ(2, stat.allocated_blocks_count());
     EXPECT_LE((CHUNK_SIZE + 2) * sizeof(int), stat.mem_used());
+    alloc.deallocate(ptr2, 2);
 
-    alloc.deallocate(ptr3, 2);
+    int* ptr3 = alloc.allocate(1, nullptr);
+    int* ptr4 = alloc.allocate(1, ptr3);
+    EXPECT_EQ(ptr3, ptr4);
+}
+
+TEST_F(pool_allocation_policy_test, test_deallocate)
+{
+    int* ptr1 = alloc.allocate(1, nullptr);
+    alloc.deallocate(ptr1, 1);
+    EXPECT_EQ(0, stat.deallocs_count());
+    EXPECT_EQ(1, stat.allocated_blocks_count());
+    EXPECT_EQ(CHUNK_SIZE * sizeof(int), stat.mem_used());
+
+    int* ptr2 = alloc.allocate(2, nullptr);
+    alloc.deallocate(ptr2, 2);
+    EXPECT_EQ(1, stat.deallocs_count());
+    EXPECT_EQ(1, stat.allocated_blocks_count());
+    EXPECT_EQ(CHUNK_SIZE * sizeof(int), stat.mem_used());
+
+    alloc.deallocate(nullptr, 1);
+    EXPECT_EQ(1, stat.deallocs_count());
+    EXPECT_EQ(1, stat.allocated_blocks_count());
+    EXPECT_EQ(CHUNK_SIZE * sizeof(int), stat.mem_used());
 }
