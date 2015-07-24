@@ -17,13 +17,23 @@ public:
 
     DECLARE_ALLOC_TRAITS(void, alloc_traits)
 
-    size_type allocs_count() const;
-    size_type deallocs_count() const;
-    size_type allocated_blocks_count() const;
-    size_type mem_used() const;
+    size_type allocs_count() const
+    {}
 
-    void register_alloc(const pointer& ptr, size_type n);
-    void register_dealloc(const pointer& ptr, size_type n);
+    size_type deallocs_count() const
+    {}
+
+    size_type allocated_blocks_count() const
+    {}
+
+    size_type mem_used() const
+    {}
+
+    void register_alloc(const const_void_pointer& ptr, size_type n)
+    {}
+
+    void register_dealloc(const const_void_pointer& ptr, size_type n)
+    {}
 
 private:
 };
@@ -36,6 +46,12 @@ class statistic_policy: public base_policy
 public:
 
     DECLARE_ALLOC_POLICY_WT(statistic_policy, base_policy, T, alloc_traits)
+
+    typedef statistic statistic_type;
+
+    explicit statistic_policy(statistic* stat = nullptr):
+        m_stat(stat)
+    {}
 
     pointer allocate(size_type n, const pointer& ptr, const_void_pointer hint = nullptr)
     {}

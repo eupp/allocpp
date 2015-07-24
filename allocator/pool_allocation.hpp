@@ -79,7 +79,7 @@ public:
 
     bool is_owned(const pointer& ptr) const
     {
-        return (m_chunk <= ptr) && (ptr < m_chunk + CHUNK_SIZE);
+        return m_chunk && (m_chunk <= ptr) && (ptr < m_chunk + CHUNK_SIZE);
     }
 
     pointer allocate()
