@@ -59,9 +59,10 @@ public:
     typedef statistic_policy<int> allocator;
     typedef typename allocator::statistic_type statistic;
 
-    statistic_policy_test():
-        alloc(&stat)
-    {}
+    statistic_policy_test()
+    {
+        alloc.set_statistic(&stat);
+    }
 
     statistic stat;
     allocator alloc;

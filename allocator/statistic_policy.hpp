@@ -46,12 +46,14 @@ public:
 
     void register_alloc(const const_void_pointer& ptr, size_type n)
     {
+        ALLOC_UNUSED(ptr);
         ++m_allocs_count;
         m_mem_used += n;
     }
 
     void register_dealloc(const const_void_pointer& ptr, size_type n)
     {
+        ALLOC_UNUSED(ptr);
         ++m_deallocs_count;
         m_mem_used -= n;
     }
@@ -79,15 +81,19 @@ public:
 
     pointer allocate(size_type n, const pointer& ptr, const_void_pointer hint = nullptr)
     {
-        const_void_pointer void_ptr = pointer_cast_traits<const_void_pointer, pointer>::static_pointer_cast(ptr);
-        m_stat->register_alloc(void_ptr, n * sizeof(T));
+        if (m_stat) {
+            const_void_pointer void_ptr = pointer_cast_traits<const_void_pointer, pointer>::static_pointer_cast(ptr);
+            m_stat->register_alloc(void_ptr, n * sizeof(T));
+        }
         return base_policy::allocate(n, ptr, hint);
     }
 
     void deallocate(const pointer& ptr, size_type n)
     {
-        const_void_pointer void_ptr = pointer_cast_traits<const_void_pointer, pointer>::static_pointer_cast(ptr);
-        m_stat->register_dealloc(void_ptr, n * sizeof(T));
+        if (m_stat) {
+            const_void_pointer void_ptr = pointer_cast_traits<const_void_pointer, pointer>::static_pointer_cast(ptr);
+            m_stat->register_dealloc(void_ptr, n * sizeof(T));
+        }
         base_policy::deallocate(ptr, n);
     }
 

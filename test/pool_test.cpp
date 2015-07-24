@@ -7,6 +7,7 @@
 #include "allocator.hpp"
 #include "alloc_policies.hpp"
 #include "pool_allocation.hpp"
+#include "statistic_policy.hpp"
 
 using namespace alloc_utility;
 using alloc_utility::details::chunk;
@@ -26,7 +27,6 @@ public:
     }
 
 private:
-
     std::default_random_engine m_eng;
     std::bernoulli_distribution m_distr;
 };
@@ -208,4 +208,49 @@ TEST_F(memory_pool_test, test_stress)
             pool.deallocate(ptr, 1);
         }
     }
+}
+
+class pool_allocation_policy_test: public ::testing::Test
+{
+public:
+
+    typedef pool_allocation_policy<int, allocation_traits<int>,
+                                        default_allocation_policy<int, allocation_traits<int>,
+                                            statistic_policy<int>
+                                        >
+                                  > allocator;
+    typedef typename allocator::statistic_type statistic;
+
+    static const int CHUNK_SIZE = allocator::CHUNK_SIZE;
+
+    pool_allocation_policy_test()
+    {
+        alloc.set_statistic(&stat);
+    }
+
+    statistic stat;
+    allocator alloc;
+};
+
+TEST_F(pool_allocation_policy_test, test_allocate)
+{
+    int* ptr1 = alloc.allocate(1, nullptr);
+    EXPECT_NE(nullptr, ptr1);
+    *ptr1 = 42;
+    int* ptr2 = alloc.allocate(1, nullptr);
+    EXPECT_NE(nullptr, ptr2);
+    *ptr2 = 42;
+    EXPECT_EQ(1, stat.allocs_count());
+    EXPECT_EQ(1, stat.allocated_blocks_count());
+    EXPECT_EQ(CHUNK_SIZE * sizeof(int), stat.mem_used());
+
+    int* ptr3 = alloc.allocate(2, nullptr);
+    EXPECT_NE(nullptr, ptr3);
+    ptr3[0] = 42;
+    ptr3[1] = 42;
+    EXPECT_EQ(2, stat.allocs_count());
+    EXPECT_EQ(2, stat.allocated_blocks_count());
+    EXPECT_LE((CHUNK_SIZE + 2) * sizeof(int), stat.mem_used());
+
+    alloc.deallocate(ptr3, 2);
 }

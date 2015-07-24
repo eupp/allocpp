@@ -119,15 +119,11 @@ public:
 
     static const int CHUNK_SIZE = chunk<T, alloc_traits>::CHUNK_SIZE;
 
-    memory_pool(allocator* alloc, size_type n = CHUNK_SIZE):
+    memory_pool(allocator* alloc):
         // calculate required number of chunks
-        m_pool((n + CHUNK_SIZE - 1) / CHUNK_SIZE)
-      , m_alloc(alloc)
+        m_alloc(alloc)
     {
         assert(alloc);
-        for (auto& chunk: m_pool) {
-            chunk.set_pointer(m_alloc->allocate(CHUNK_SIZE, pointer(nullptr)));
-        }
     }
 
     ~memory_pool()
@@ -141,6 +137,20 @@ public:
     memory_pool(memory_pool&&) = delete;
     memory_pool& operator=(const memory_pool&) = delete;
     memory_pool& operator=(memory_pool&&) = delete;
+
+    void reserve(size_type size)
+    {
+        size_type curr_size = CHUNK_SIZE * m_pool.size();
+        if (size <= curr_size) {
+            return;
+        }
+        int old_chunks_count = m_pool.size();
+        int chunks_count = (size + CHUNK_SIZE - 1) / CHUNK_SIZE;
+        m_pool.resize(chunks_count);
+        for (int i = old_chunks_count; i < chunks_count; ++i) {
+            m_pool[i].set_pointer(m_alloc->allocate(CHUNK_SIZE, pointer(nullptr)));
+        }
+    }
 
     pointer allocate(size_type n, const pointer& ptr, const_void_pointer hint = nullptr)
     {
@@ -192,9 +202,9 @@ public:
 
     static const int CHUNK_SIZE = details::memory_pool<T, alloc_traits>::CHUNK_SIZE;
 
-    explicit pool_allocation_policy(size_type n = CHUNK_SIZE):
+    explicit pool_allocation_policy():
         // calculate required number of chunks
-        m_pool(std::make_shared<pool_type>(this, n))
+        m_pool(std::make_shared<pool_type>(this))
     {}
 
     template <typename U>
