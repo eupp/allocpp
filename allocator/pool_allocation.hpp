@@ -163,8 +163,11 @@ public:
         int chunks_diff = chunks_count - old_chunks_count;
         m_pool.resize(chunks_count);
         pointer ptr = m_alloc->allocate(chunks_diff * CHUNK_SIZE, pointer(nullptr));
+
         int i = old_chunks_count;
-        m_pool[i++].set_pointer(ptr, true);
+        m_pool[i].set_pointer(ptr, true);
+        ++i;
+        ptr += CHUNK_SIZE;
         for (; i < chunks_count; ++i, ptr += CHUNK_SIZE) {
             m_pool[i].set_pointer(ptr, false);
         }
