@@ -18,40 +18,40 @@ public:
 
     DECLARE_ALLOC_TRAITS(void, alloc_traits)
 
-    simple_statistic():
+    simple_statistic() noexcept:
         m_allocs_count(0)
       , m_deallocs_count(0)
       , m_mem_used(0)
     {}
 
-    size_type allocs_count() const
+    size_type allocs_count() const noexcept
     {
         return m_allocs_count;
     }
 
-    size_type deallocs_count() const
+    size_type deallocs_count() const noexcept
     {
         return m_deallocs_count;
     }
 
-    size_type allocated_blocks_count() const
+    size_type allocated_blocks_count() const noexcept
     {
         return m_allocs_count - m_deallocs_count;
     }
 
-    size_type mem_used() const
+    size_type mem_used() const noexcept
     {
         return m_mem_used;
     }
 
-    void register_alloc(const const_void_pointer& ptr, size_type n)
+    void register_alloc(const const_void_pointer& ptr, size_type n) noexcept
     {
         ALLOC_UNUSED(ptr);
         ++m_allocs_count;
         m_mem_used += n;
     }
 
-    void register_dealloc(const const_void_pointer& ptr, size_type n)
+    void register_dealloc(const const_void_pointer& ptr, size_type n) noexcept
     {
         ALLOC_UNUSED(ptr);
         ++m_deallocs_count;
@@ -75,7 +75,7 @@ public:
 
     typedef statistic statistic_type;
 
-    explicit statistic_policy(statistic* stat = nullptr):
+    explicit statistic_policy(statistic* stat = nullptr) noexcept:
         m_stat(stat)
     {}
 
@@ -97,12 +97,12 @@ public:
         base_policy::deallocate(ptr, n);
     }
 
-    statistic* get_statistic() const
+    statistic* get_statistic() const noexcept
     {
         return m_stat;
     }
 
-    void set_statistic(statistic* stat)
+    void set_statistic(statistic* stat) noexcept
     {
         m_stat = stat;
     }

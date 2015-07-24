@@ -24,9 +24,7 @@ class chunk
 public:
 
     DECLARE_ALLOC_TRAITS(T, alloc_traits)
-
-    template <typename U>
-    using rebind_pointer = typename alloc_traits::template rebind_pointer<U>;
+    DECLARE_REBIND_POINTERS(alloc_traits)
 
     typedef rebind_pointer<std::uint8_t> raw_pointer;
 
@@ -46,14 +44,14 @@ public:
         m_chunk(other.m_chunk)
       , m_head(other.m_head)
       , m_available(other.m_available)
-      , m_delete_flag(other.delete_flag())
+      , m_delete_flag(other.m_delete_flag)
     {}
 
     chunk(const chunk&) = delete;
     chunk& operator=(const chunk&) = delete;
     chunk& operator=(chunk&&) = delete;
 
-    pointer get_pointer() const
+    pointer get_pointer() const noexcept
     {
         return m_chunk;
     }
@@ -74,17 +72,17 @@ public:
         }
     }
 
-    bool is_memory_available() const
+    bool is_memory_available() const noexcept
     {
         return m_chunk && (m_available > 0);
     }
 
-    bool is_owned(const pointer& ptr) const
+    bool is_owned(const pointer& ptr) const noexcept
     {
         return m_chunk && (m_chunk <= ptr) && (ptr < m_chunk + CHUNK_SIZE);
     }
 
-    bool delete_flag() const
+    bool delete_flag() const noexcept
     {
         return m_delete_flag;
     }
@@ -127,7 +125,7 @@ public:
 
     static const int CHUNK_SIZE = chunk<T, alloc_traits>::CHUNK_SIZE;
 
-    memory_pool(allocator* alloc):
+    memory_pool(allocator* alloc) noexcept:
         // calculate required number of chunks
         m_alloc(alloc)
     {
@@ -148,7 +146,7 @@ public:
     memory_pool& operator=(const memory_pool&) = delete;
     memory_pool& operator=(memory_pool&&) = delete;
 
-    size_type size() const
+    size_type size() const noexcept
     {
         return CHUNK_SIZE * m_pool.size();
     }
@@ -223,7 +221,7 @@ public:
     pool_allocation_policy& operator=(const pool_allocation_policy&) = delete;
     pool_allocation_policy& operator=(pool_allocation_policy&&) = delete;
 
-    size_type size() const
+    size_type size() const noexcept
     {
         return m_pool->size();
     }

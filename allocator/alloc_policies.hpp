@@ -28,14 +28,14 @@ public:
     template <typename policy>
     using rebind_base = none_policy<T, alloc_traits>;
 
-    pointer allocate(size_type n, const pointer& ptr, const_void_pointer hint = nullptr)
+    pointer allocate(size_type n, const pointer& ptr, const_void_pointer hint = nullptr) noexcept
     {
         ALLOC_UNUSED(n);
         ALLOC_UNUSED(hint);
         return ptr;
     }
 
-    void deallocate(const pointer& ptr, size_type n)
+    void deallocate(const pointer& ptr, size_type n) noexcept
     {
         ALLOC_UNUSED(ptr);
         ALLOC_UNUSED(n);
