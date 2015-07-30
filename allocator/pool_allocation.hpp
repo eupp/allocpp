@@ -24,7 +24,6 @@ class chunk
 public:
 
     DECLARE_ALLOC_TRAITS(T, alloc_traits)
-    DECLARE_REBIND_POINTERS(alloc_traits)
 
     typedef rebind_pointer<std::uint8_t> raw_pointer;
 
@@ -206,7 +205,8 @@ class pool_allocation_policy: public base_policy
 
 public:
 
-    DECLARE_ALLOC_POLICY_WT(pool_allocation_policy, base_policy, T, alloc_traits)
+    DECLARE_ALLOC_TRAITS(T, alloc_traits)
+    DECLARE_REBIND_ALLOC(pool_allocation_policy, T, alloc_traits, base_policy)
 
     explicit pool_allocation_policy():
         // calculate required number of chunks

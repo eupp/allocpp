@@ -8,7 +8,8 @@ SOURCES += \
     test/smoke_test.cpp \
     test/policies_test.cpp \
     test/pool_test.cpp \
-    test/statistic_policy_test.cpp
+    test/statistic_policy_test.cpp \
+    test/stl_test.cpp
 
 HEADERS += \
     allocator.hpp \

@@ -71,7 +71,8 @@ class statistic_policy: public base_policy
 {
 public:
 
-    DECLARE_ALLOC_POLICY_WT(statistic_policy, base_policy, T, alloc_traits)
+    DECLARE_ALLOC_TRAITS(T, alloc_traits)
+    DECLARE_REBIND_ALLOC(statistic_policy, T, alloc_traits, statistic, base_policy)
 
     typedef statistic statistic_type;
 

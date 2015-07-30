@@ -15,16 +15,10 @@ class none_policy
 {
 public:
 
-    typedef T value_type;
-    typedef typename alloc_traits::pointer pointer;
-    typedef typename alloc_traits::const_void_pointer const_void_pointer;
-    typedef typename alloc_traits::size_type size_type;
-
-    typedef alloc_traits allocation_traits;
+    DECLARE_ALLOC_TRAITS(T, alloc_traits)
 
     template <typename U>
     using rebind = none_policy<U, typename alloc_traits::template rebind<U>>;
-
     template <typename policy>
     using rebind_base = none_policy<T, alloc_traits>;
 
@@ -48,7 +42,8 @@ class default_allocation_policy: public base_policy
 {
 public:
 
-    DECLARE_ALLOC_POLICY_WT(default_allocation_policy, base_policy, T, alloc_traits)
+    DECLARE_ALLOC_TRAITS(T, alloc_traits)
+    DECLARE_REBIND_ALLOC(default_allocation_policy, T, alloc_traits, base_policy)
 
     pointer allocate(size_type n, const pointer& ptr, const_void_pointer hint = nullptr)
     {
@@ -72,7 +67,8 @@ class throw_bad_alloc_policy: public base_policy
 {
 public:
 
-    DECLARE_ALLOC_POLICY_WT(throw_bad_alloc_policy, base_policy, T, alloc_traits)
+    DECLARE_ALLOC_TRAITS(T, alloc_traits)
+    DECLARE_REBIND_ALLOC(throw_bad_alloc_policy, T, alloc_traits, base_policy)
 
     pointer allocate(size_type n, const pointer& ptr, const_void_pointer hint = nullptr)
     {
@@ -93,7 +89,8 @@ class logging_policy: public base_policy
 {
 public:
 
-    DECLARE_ALLOC_POLICY_WT(logging_policy, base_policy, T, alloc_traits)
+    DECLARE_ALLOC_TRAITS(T, alloc_traits)
+    DECLARE_REBIND_ALLOC(logging_policy, T, alloc_traits, base_policy)
 
     logging_policy(std::ostream* log = nullptr):
         m_log(log)

@@ -78,7 +78,6 @@ public:
                   "Allocator needs at least one allocation policy");
 
     DECLARE_ALLOC_TRAITS(T, alloc_traits)
-    DECLARE_REBIND_POINTERS(alloc_traits)
 
     template <typename U>
     struct rebind
