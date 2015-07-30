@@ -12,13 +12,16 @@ namespace alloc_utility
 {
 
 template <typename alloc_traits>
-class simple_statistic
+class basic_statistic
 {
 public:
 
     DECLARE_ALLOC_TRAITS(void, alloc_traits)
 
-    simple_statistic() noexcept:
+    template <typename U>
+    using rebind = basic_statistic;
+
+    basic_statistic() noexcept:
         m_allocs_count(0)
       , m_deallocs_count(0)
       , m_mem_used(0)
@@ -65,7 +68,7 @@ private:
 };
 
 template <typename T, typename alloc_traits = allocation_traits<T>,
-          typename statistic = simple_statistic<alloc_traits>,
+          typename statistic = basic_statistic<alloc_traits>,
           typename base_policy = none_policy<T>>
 class statistic_policy: public base_policy
 {

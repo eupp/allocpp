@@ -42,6 +42,31 @@ struct rebind_helper
     using rebind_base = typename rebind_base_helper<sizeof...(types)-1, alloc, T, policy, types...>::type;
 };
 
+// helper trait for check that rebind type is defined in class
+
+template <typename C>
+class is_rebind_defined
+{
+    template <
+              typename X,
+              typename Y = typename X::type
+             >
+    struct check_helper {};
+
+    typedef char true_type;
+    struct false_type { true_type m[2]; };
+
+    template <typename X>
+    static true_type check(check_helper<X>* p);
+
+    template <typename X>
+    static false_type check(...);
+
+public:
+
+    static bool const value = sizeof((check<C>)(0)) == sizeof(true_type);
+};
+
 } // namespace details
 
 } // namespace alloc_utility

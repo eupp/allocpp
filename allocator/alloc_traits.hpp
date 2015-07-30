@@ -100,7 +100,7 @@ public:
 
 // trait for check existance of deallocate function in policy
 
-template <typename C, typename alloc_traits = allocation_traits<C>>
+template <typename C>
 class is_deallocate_defined
 {
     typedef typename C::allocation_traits::pointer pointer;
