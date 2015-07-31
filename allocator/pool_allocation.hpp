@@ -125,7 +125,6 @@ public:
     static const int CHUNK_SIZE = chunk<T, alloc_traits>::CHUNK_SIZE;
 
     memory_pool(allocator* alloc) noexcept:
-        // calculate required number of chunks
         m_alloc(alloc)
     {
         assert(alloc);
@@ -198,7 +197,8 @@ private:
 
 } // namespace details
 
-template <typename T, typename alloc_traits = allocation_traits<T>, typename base_policy = default_allocation_policy<T>>
+template <typename T, typename alloc_traits = allocation_traits<T>,
+          typename base_policy = default_allocation_policy<T, alloc_traits>>
 class pool_allocation_policy: public base_policy
 {
     typedef details::memory_pool<T, base_policy, alloc_traits> pool_type;
@@ -209,13 +209,18 @@ public:
     DECLARE_REBIND_ALLOC(pool_allocation_policy, T, alloc_traits, base_policy)
 
     explicit pool_allocation_policy():
-        // calculate required number of chunks
         m_pool(std::make_shared<pool_type>(this))
+    {}
+
+    pool_allocation_policy(const pool_allocation_policy& other):
+        base_policy(other)
+      , m_pool(other.m_pool)
     {}
 
     template <typename U>
     pool_allocation_policy(const pool_allocation_policy::rebind<U>& other):
-        pool_allocation_policy(pool_allocation_policy())
+        base_policy(other)
+      , m_pool(std::make_shared<pool_type>(this))
     {}
 
     pool_allocation_policy& operator=(const pool_allocation_policy&) = delete;

@@ -9,7 +9,7 @@ class simple_statistic_test: public ::testing::Test
 {
 public:
 
-    typedef basic_statistic<allocation_traits<int>> statistic;
+    typedef basic_statistic<const void*, size_t> statistic;
 
     statistic stat;
 };

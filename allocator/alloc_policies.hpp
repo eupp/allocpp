@@ -10,40 +10,23 @@
 namespace alloc_utility
 {
 
-template <typename T, typename alloc_traits = allocation_traits<T>>
-class none_policy
-{
-public:
-
-    DECLARE_ALLOC_TRAITS(T, alloc_traits)
-
-    template <typename U>
-    using rebind = none_policy<U, typename alloc_traits::template rebind<U>>;
-    template <typename policy>
-    using rebind_base = none_policy<T, alloc_traits>;
-
-    pointer allocate(size_type n, const pointer& ptr, const_void_pointer hint = nullptr) noexcept
-    {
-        ALLOC_UNUSED(n);
-        ALLOC_UNUSED(hint);
-        return ptr;
-    }
-
-    void deallocate(const pointer& ptr, size_type n) noexcept
-    {
-        ALLOC_UNUSED(ptr);
-        ALLOC_UNUSED(n);
-        return;
-    }
-};
-
-template <typename T, typename alloc_traits = allocation_traits<T>, typename base_policy = none_policy<T>>
+template <typename T, typename alloc_traits = allocation_traits<T>,
+          typename base_policy = none_policy<T, alloc_traits>>
 class default_allocation_policy: public base_policy
 {
 public:
 
     DECLARE_ALLOC_TRAITS(T, alloc_traits)
     DECLARE_REBIND_ALLOC(default_allocation_policy, T, alloc_traits, base_policy)
+
+    default_allocation_policy() = default;
+
+    template <typename U>
+    default_allocation_policy(const default_allocation_policy::rebind<U>& other):
+        base_policy(other)
+    {
+        ALLOC_UNUSED(other);
+    }
 
     pointer allocate(size_type n, const pointer& ptr, const_void_pointer hint = nullptr)
     {
@@ -60,15 +43,36 @@ public:
         base_policy::deallocate(ptr, n);
     }
 
+    template <typename U>
+    bool operator==(const default_allocation_policy::rebind<U>& other)
+    {
+        return base_policy::operator==(other);
+    }
+
+    template <typename U>
+    bool operator!=(const default_allocation_policy::rebind<U>& other)
+    {
+        return base_policy::operator!=(other);
+    }
 };
 
-template <typename T, typename alloc_traits = allocation_traits<T>, typename base_policy = none_policy<T>>
+template <typename T, typename alloc_traits = allocation_traits<T>,
+          typename base_policy = none_policy<T, alloc_traits>>
 class throw_bad_alloc_policy: public base_policy
 {
 public:
 
     DECLARE_ALLOC_TRAITS(T, alloc_traits)
     DECLARE_REBIND_ALLOC(throw_bad_alloc_policy, T, alloc_traits, base_policy)
+
+    throw_bad_alloc_policy() = default;
+
+    template <typename U>
+    throw_bad_alloc_policy(const throw_bad_alloc_policy::rebind<U>& other):
+        base_policy(other)
+    {
+        ALLOC_UNUSED(other);
+    }
 
     pointer allocate(size_type n, const pointer& ptr, const_void_pointer hint = nullptr)
     {
@@ -82,9 +86,22 @@ public:
     {
         base_policy::deallocate(ptr, n);
     }
+
+    template <typename U>
+    bool operator==(const throw_bad_alloc_policy::rebind<U>& other)
+    {
+        return base_policy::operator==(other);
+    }
+
+    template <typename U>
+    bool operator!=(const throw_bad_alloc_policy::rebind<U>& other)
+    {
+        return base_policy::operator!=(other);
+    }
 };
 
-template <typename T, typename alloc_traits = allocation_traits<T>, typename base_policy = none_policy<T>>
+template <typename T, typename alloc_traits = allocation_traits<T>,
+          typename base_policy = none_policy<T, alloc_traits>>
 class logging_policy: public base_policy
 {
 public:
@@ -94,6 +111,12 @@ public:
 
     logging_policy(std::ostream* log = nullptr):
         m_log(log)
+    {}
+
+    template <typename U>
+    logging_policy(const logging_policy::rebind<U>& other):
+        base_policy(other)
+      , m_log(other.m_log)
     {}
 
     pointer allocate(size_type n, const pointer& ptr, const_void_pointer hint = nullptr)
@@ -122,8 +145,19 @@ public:
         m_log = log;
     }
 
-private:
+    template <typename U>
+    bool operator==(const logging_policy::rebind<U>& other)
+    {
+        return base_policy::operator==(other);
+    }
 
+    template <typename U>
+    bool operator!=(const logging_policy::rebind<U>& other)
+    {
+        return base_policy::operator!=(other);
+    }
+
+private:
     std::ostream* m_log;
 };
 

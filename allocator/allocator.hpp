@@ -5,6 +5,7 @@
 #include <type_traits>
 
 #include "alloc_traits.hpp"
+#include "none_policy.hpp"
 #include "macro.hpp"
 
 namespace alloc_utility
@@ -24,6 +25,8 @@ namespace details
     class policies_list<alloc_traits, alloc_policy, alloc_policies...>
             : public alloc_policy::template rebind_base<policies_list<alloc_traits, alloc_policies...>>
     {
+        typedef alloc_policy::template rebind_base<policies_list<alloc_traits, alloc_policies...>> base;
+
     public:
 
         typedef typename alloc_traits::pointer pointer;
@@ -37,31 +40,54 @@ namespace details
                                         typename alloc_policy::template rebind<U>,
                                         typename alloc_policies::template rebind<U>...
                                     >;
+
+        policies_list() = default;
+
+        template <typename U>
+        policies_list(const policies_list::rebind<U>& other):
+            base(other)
+        {}
+
+        template <typename U>
+        bool operator==(const policies_list::rebind<U>& other) const noexcept
+        {
+            return base::operator==(other);
+        }
+
+        template <typename U>
+        bool operator!=(const policies_list::rebind<U>& other) const noexcept
+        {
+            return base::operator!=(other);
+        }
     };
 
     template <typename alloc_traits>
-    class policies_list<alloc_traits>
+    class policies_list<alloc_traits>: public none_policy<alloc_traits::value_type, alloc_traits>
     {
     public:
-
-        typedef typename alloc_traits::pointer pointer;
-        typedef typename alloc_traits::size_type size_type;
 
         template <typename U>
         using rebind = policies_list<typename alloc_traits::template rebind<U>>;
 
-        pointer allocate(size_type n, const pointer& ptr, std::allocator<void>::const_pointer hint = 0)
+        policies_list() = default;
+
+        template <typename U>
+        policies_list(const policies_list::rebind<U>& other)
         {
-            ALLOC_UNUSED(n);
-            ALLOC_UNUSED(hint);
-            return ptr;
+            ALLOC_UNUSED(other);
         }
 
-        void deallocate(const pointer& ptr, size_type n)
+        template <typename U>
+        bool operator==(const policies_list::rebind<U>& other) const noexcept
         {
-            ALLOC_UNUSED(ptr);
-            ALLOC_UNUSED(n);
-            return;
+            ALLOC_UNUSED(other);
+            return true;
+        }
+
+        template <typename U>
+        bool operator!=(const policies_list::rebind<U>& other) const noexcept
+        {
+            return !operator==(other);
         }
     };
 

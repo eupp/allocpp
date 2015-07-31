@@ -23,7 +23,8 @@ HEADERS += \
     allocator/pointer_cast.hpp \
     allocator/pool_allocation.hpp \
     allocator/macro.hpp \
-    allocator/statistic_policy.hpp
+    allocator/statistic_policy.hpp \
+    allocator/none_policy.hpp
 
 INCLUDEPATH += allocator
 

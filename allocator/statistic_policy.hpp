@@ -11,12 +11,10 @@
 namespace alloc_utility
 {
 
-template <typename alloc_traits>
+template <typename const_void_pointer, typename size_type>
 class basic_statistic
 {
 public:
-
-    DECLARE_ALLOC_TRAITS(void, alloc_traits)
 
     template <typename U>
     using rebind = basic_statistic;
@@ -68,8 +66,8 @@ private:
 };
 
 template <typename T, typename alloc_traits = allocation_traits<T>,
-          typename statistic = basic_statistic<alloc_traits>,
-          typename base_policy = none_policy<T>>
+          typename statistic = basic_statistic<typename alloc_traits::const_void_pointer, typename alloc_traits::size_type>,
+          typename base_policy = none_policy<T, alloc_traits>>
 class statistic_policy: public base_policy
 {
 public:
@@ -82,6 +80,18 @@ public:
     explicit statistic_policy(statistic* stat = nullptr) noexcept:
         m_stat(stat)
     {}
+
+    template <typename U>
+    statistic_policy(const statistic_policy::rebind<U>& other):
+        base_policy(other)
+      , m_stat(other.m_stat)
+    {}
+
+    template <typename U>
+    bool operator==(const statistic_policy::rebind<U>& other)
+    {
+        return true;
+    }
 
     pointer allocate(size_type n, const pointer& ptr, const_void_pointer hint = nullptr)
     {
@@ -115,6 +125,12 @@ private:
     statistic* m_stat;
 };
 
+template <typename T, typename U>
+bool operator==(const statistic_policy<T>& alloc1, const statistic_policy<U>& alloc2)
+{
+
 }
+
+} // namespace alloc_utility
 
 #endif // STATISTIC_POLICY_HPP
