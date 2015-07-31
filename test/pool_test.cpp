@@ -12,6 +12,7 @@
 
 using namespace alloc_utility;
 using alloc_utility::details::chunk;
+using alloc_utility::details::memory_block;
 
 class bernulli_generator
 {
@@ -36,11 +37,14 @@ class chunk_test: public ::testing::Test
 {
 public:
 
-    static const int CHUNK_SIZE = chunk<std::uint8_t*, size_t>::CHUNK_MAXSIZE;
+    typedef std::uint8_t byte;
+
+    static const int CHUNK_SIZE = chunk<byte*, size_t>::CHUNK_MAXSIZE;
+    static const int OBJ_SIZE = sizeof(int);
 
     chunk_test():
-        mem(new std::uint8_t[sizeof(int) * CHUNK_SIZE])
-      , chk(mem, sizeof(int))
+        mem(new byte[OBJ_SIZE * CHUNK_SIZE])
+      , chk(mem, OBJ_SIZE)
       , rand(0.75)
     {}
 
@@ -49,14 +53,14 @@ public:
         delete[] mem;
     }
 
-    std::uint8_t* mem;
-    chunk<std::uint8_t*, size_t> chk;
+    byte* mem;
+    chunk<byte*, size_t> chk;
     bernulli_generator rand;
 };
 
 TEST_F(chunk_test, test_size)
 {
-    EXPECT_EQ((int)CHUNK_SIZE, chk.size());
+    EXPECT_EQ((size_t)CHUNK_SIZE, chk.size());
 }
 
 TEST_F(chunk_test, test_is_memory_available)
@@ -64,78 +68,187 @@ TEST_F(chunk_test, test_is_memory_available)
     EXPECT_TRUE(chk.is_memory_available());
 
     for (int i = 0; i < CHUNK_SIZE; ++i) {
-        chk.allocate(sizeof(int));
+        chk.allocate(OBJ_SIZE);
     }
-    EXPECT_FALSE(chk.is_memory_available());
-
-    chk.set_pointer(nullptr, sizeof(int));
     EXPECT_FALSE(chk.is_memory_available());
 }
 
 TEST_F(chunk_test, test_is_owned)
 {
-    EXPECT_TRUE(chk.is_owned(mem, sizeof(int)));
-    EXPECT_FALSE(chk.is_owned(mem + (CHUNK_SIZE + 10) * sizeof(int), sizeof(int)));
-    EXPECT_FALSE(chk.is_owned(mem - 1, sizeof(int)));
-    EXPECT_FALSE(chk.is_owned(nullptr, sizeof(int)));
+    EXPECT_TRUE(chk.is_owned(mem, OBJ_SIZE));
+    EXPECT_FALSE(chk.is_owned(mem + (CHUNK_SIZE + 10) * OBJ_SIZE, OBJ_SIZE));
+    EXPECT_FALSE(chk.is_owned(mem - OBJ_SIZE, OBJ_SIZE));
+    EXPECT_FALSE(chk.is_owned(nullptr, OBJ_SIZE));
 }
 
 TEST_F(chunk_test, test_allocate)
 {
-    std::uint8_t* ptr1 = chk.allocate(sizeof(int));
+    byte* ptr1 = chk.allocate(OBJ_SIZE);
     EXPECT_NE(nullptr, ptr1);
-    EXPECT_TRUE(chk.is_owned(ptr1, sizeof(int)));
+    EXPECT_TRUE(chk.is_owned(ptr1, OBJ_SIZE));
     // try dereference pointer
     // in case of incorrect allocation it might cause segmentation fault
     *ptr1 = 42;
 
-    std::uint8_t* ptr2 = chk.allocate(sizeof(int));
+    byte* ptr2 = chk.allocate(OBJ_SIZE);
     EXPECT_NE(nullptr, ptr2);
     EXPECT_NE(ptr1, ptr2);
-    EXPECT_TRUE(chk.is_owned(ptr2, sizeof(int)));
+    EXPECT_TRUE(chk.is_owned(ptr2, OBJ_SIZE));
     *ptr2 = 42;
 
     for (int i = 0; i < CHUNK_SIZE - 2; ++i) {
-        std::uint8_t* ptr3 = chk.allocate(sizeof(int));
+        byte* ptr3 = chk.allocate(OBJ_SIZE);
         *ptr3 = 42;
     }
 
-    std::uint8_t* ptr4 = chk.allocate(sizeof(int));
+    byte* ptr4 = chk.allocate(OBJ_SIZE);
     EXPECT_EQ(nullptr, ptr4);
 }
 
 TEST_F(chunk_test, test_deallocate)
 {
-    std::uint8_t* ptr = nullptr;
+    byte* ptr = nullptr;
     for (int i = 0; i < CHUNK_SIZE; ++i) {
-        ptr = chk.allocate(sizeof(int));
+        ptr = chk.allocate(OBJ_SIZE);
     }
-    chk.deallocate(ptr, sizeof(int));
+    chk.deallocate(ptr, OBJ_SIZE);
     EXPECT_TRUE(chk.is_memory_available());
 
     ptr = nullptr;
-    ptr = chk.allocate(sizeof(int));
+    ptr = chk.allocate(OBJ_SIZE);
     EXPECT_NE(nullptr, ptr);
 }
 
 TEST_F(chunk_test, test_stress)
 {
     const int ITER_COUNT = 2000;
-    std::stack<std::uint8_t*> st;
+    std::stack<byte*> st;
     for (int i = 0; i < ITER_COUNT; ++i) {
         if (rand() && chk.is_memory_available()) {
-            std::uint8_t* ptr = chk.allocate(sizeof(int));
+            byte* ptr = chk.allocate(OBJ_SIZE);
             ASSERT_NE(nullptr, ptr);
             // try dereference pointer
             // in case of incorrect allocation it might cause segmentation fault
             *ptr = 42;
             st.push(ptr);
         } else if (!st.empty()) {
-            std::uint8_t* ptr = st.top();
+            byte* ptr = st.top();
             st.pop();
-            ASSERT_TRUE(chk.is_owned(ptr, sizeof(int)));
-            chk.deallocate(ptr, sizeof(int));
+            ASSERT_TRUE(chk.is_owned(ptr, OBJ_SIZE));
+            chk.deallocate(ptr, OBJ_SIZE);
             ASSERT_TRUE(chk.is_memory_available());
+        }
+    }
+}
+
+class memory_block_test: public ::testing::Test
+{
+public:
+
+    typedef std::uint8_t byte;
+    typedef typename memory_block<byte*, size_t>::chunk_it chunk_it;
+
+    static const int BLOCK_SIZE = 4 * chunk<byte*, size_t>::CHUNK_MAXSIZE + 1;
+    static const int OBJ_SIZE = sizeof(int);
+
+    memory_block_test():
+        mem(new byte[OBJ_SIZE * BLOCK_SIZE])
+      , block(mem, OBJ_SIZE, BLOCK_SIZE)
+      , rand(0.75)
+    {}
+
+    ~memory_block_test()
+    {
+        delete[] mem;
+    }
+
+    byte* mem;
+    memory_block<byte*, size_t> block;
+    bernulli_generator rand;
+};
+
+TEST_F(memory_block_test, test_size)
+{
+    EXPECT_EQ((size_t)BLOCK_SIZE, block.size());
+}
+
+TEST_F(memory_block_test, test_is_memory_available)
+{
+    EXPECT_TRUE(block.is_memory_available());
+
+    for (int i = 0; i < BLOCK_SIZE; ++i) {
+        block.allocate(OBJ_SIZE);
+    }
+    EXPECT_FALSE(block.is_memory_available());
+}
+
+TEST_F(memory_block_test, test_is_owned)
+{
+    EXPECT_TRUE(block.is_owned(mem, OBJ_SIZE));
+    EXPECT_FALSE(block.is_owned(mem + (BLOCK_SIZE + 10) * OBJ_SIZE, OBJ_SIZE));
+    EXPECT_FALSE(block.is_owned(mem - OBJ_SIZE, OBJ_SIZE));
+    EXPECT_FALSE(block.is_owned(nullptr, OBJ_SIZE));
+}
+
+TEST_F(memory_block_test, test_allocate)
+{
+    auto res = block.allocate(OBJ_SIZE);
+    byte* ptr1 = res.first;
+    chunk_it chk = res.second;
+    EXPECT_NE(nullptr, ptr1);
+    EXPECT_TRUE(block.is_owned(ptr1, OBJ_SIZE));
+    EXPECT_TRUE(chk->is_owned(ptr1, OBJ_SIZE));
+    // try dereference pointer
+    // in case of incorrect allocation it might cause segmentation fault
+    *ptr1 = 42;
+
+    byte* ptr2 = block.allocate(OBJ_SIZE).first;
+    EXPECT_NE(nullptr, ptr2);
+    EXPECT_NE(ptr1, ptr2);
+    EXPECT_TRUE(block.is_owned(ptr2, OBJ_SIZE));
+    *ptr2 = 42;
+
+    for (int i = 0; i < BLOCK_SIZE - 2; ++i) {
+        byte* ptr3 = block.allocate(OBJ_SIZE).first;
+        *ptr3 = 42;
+    }
+
+    byte* ptr4 = block.allocate(OBJ_SIZE).first;
+    EXPECT_EQ(nullptr, ptr4);
+}
+
+TEST_F(memory_block_test, test_deallocate)
+{
+    byte* ptr = nullptr;
+    for (int i = 0; i < BLOCK_SIZE; ++i) {
+        ptr = block.allocate(OBJ_SIZE).first;
+    }
+    block.deallocate(ptr, OBJ_SIZE);
+    EXPECT_TRUE(block.is_memory_available());
+
+    ptr = nullptr;
+    ptr = block.allocate(OBJ_SIZE).first;
+    EXPECT_NE(nullptr, ptr);
+}
+
+TEST_F(memory_block_test, test_stress)
+{
+    const int ITER_COUNT = 2000;
+    std::stack<byte*> st;
+    for (int i = 0; i < ITER_COUNT; ++i) {
+        if (rand() && block.is_memory_available()) {
+            byte* ptr = block.allocate(OBJ_SIZE).first;
+            ASSERT_NE(nullptr, ptr);
+            // try dereference pointer
+            // in case of incorrect allocation it might cause segmentation fault
+            *ptr = 42;
+            st.push(ptr);
+        } else if (!st.empty()) {
+            byte* ptr = st.top();
+            st.pop();
+            ASSERT_TRUE(block.is_owned(ptr, OBJ_SIZE));
+            block.deallocate(ptr, OBJ_SIZE);
+            ASSERT_TRUE(block.is_memory_available());
         }
     }
 }

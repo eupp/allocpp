@@ -7,6 +7,7 @@
 #include <vector>
 #include <memory>
 #include <type_traits>
+#include <utility>
 
 #include "alloc_traits.hpp"
 #include "alloc_policies.hpp"
@@ -29,14 +30,18 @@ public:
 
     static const int CHUNK_MAXSIZE = std::numeric_limits<std::uint8_t>::max();
 
-    explicit chunk(size_type obj_size, std::uint8_t chunk_size = CHUNK_MAXSIZE)
+    chunk(pointer ptr, size_type obj_size, std::uint8_t chunk_size = CHUNK_MAXSIZE):
+        m_chunk(ptr)
+      , m_head(0)
+      , m_available(chunk_size)
+      , m_size(chunk_size)
     {
-        set_pointer(pointer(nullptr), obj_size, chunk_size);
-    }
-
-    chunk(const pointer& chunk_ptr, size_type obj_size, std::uint8_t chunk_size = CHUNK_MAXSIZE)
-    {
-        set_pointer(chunk_ptr, obj_size, chunk_size);
+        assert(ptr);
+        for (int i = 1; i <= chunk_size; ++i, ptr += obj_size) {
+            ptr[0] = i;
+        }
+        // last block is initialized with chunk_size
+        // it is really doesn't matter because when we reach last block m_available == 0
     }
 
     chunk(chunk&& other) noexcept:
@@ -50,34 +55,14 @@ public:
     chunk& operator=(const chunk&) = delete;
     chunk& operator=(chunk&&) = delete;
 
-    pointer get_pointer() const noexcept
-    {
-        return m_chunk;
-    }
-
-    void set_pointer(pointer ptr, size_type obj_size, std::uint8_t chunk_size = CHUNK_MAXSIZE)
-    {
-        m_chunk = ptr;
-        m_head = 0;
-        m_available = chunk_size;
-        m_size = chunk_size;
-        if (ptr) {
-            for (int i = 1; i <= chunk_size; ++i, ptr += obj_size) {
-                ptr[0] = i;
-            }
-            // last block is initialized with chunk_size
-            // it is really doesn't matter because when we reach last block m_available == 0
-        }
-    }
-
     bool is_memory_available() const noexcept
     {
-        return m_chunk && (m_available > 0);
+        return m_available > 0;
     }
 
     bool is_owned(const pointer& ptr, size_type obj_size) const noexcept
     {
-        return m_chunk && (m_chunk <= ptr) && (ptr < m_chunk + size() * obj_size);
+        return (m_chunk <= ptr) && (ptr < m_chunk + size() * obj_size);
     }
 
     std::uint8_t size() const noexcept
@@ -108,6 +93,81 @@ private:
     std::uint8_t m_head;
     std::uint8_t m_available;
     std::uint8_t m_size;
+};
+
+template <typename pointer, typename size_type>
+class memory_block
+{
+public:
+
+    typedef chunk<pointer, size_type> chunk_type;
+    typedef typename std::vector<chunk_type>::iterator chunk_it;
+
+    memory_block(pointer mem, size_type obj_size, size_type size):
+        m_mem(mem)
+      , m_size(size)
+    {
+        size_type chunks_num = (size + chunk_type::CHUNK_MAXSIZE - 1) / chunk_type::CHUNK_MAXSIZE;
+        size_type last_chunk_size = size % chunk_type::CHUNK_MAXSIZE;
+        if (last_chunk_size == 0) {
+            last_chunk_size = chunk_type::CHUNK_MAXSIZE;
+        }
+
+        m_chunks.reserve(chunks_num);
+        for (size_type i = 0; i < chunks_num - 1; ++i, mem += obj_size * chunk_type::CHUNK_MAXSIZE) {
+            m_chunks.emplace_back(mem, obj_size, (size_type)chunk_type::CHUNK_MAXSIZE);
+        }
+        m_chunks.emplace_back(mem, obj_size, last_chunk_size);
+    }
+
+    bool is_memory_available() const noexcept
+    {
+        for (auto& chunk: m_chunks) {
+            if (chunk.is_memory_available()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool is_owned(const pointer& ptr, size_type obj_size) const noexcept
+    {
+        return (m_mem <= ptr) && (ptr < m_mem + obj_size * size());
+    }
+
+    pointer get_memory_ptr() const noexcept
+    {
+        return m_mem;
+    }
+
+    size_type size() const noexcept
+    {
+        return m_size;
+    }
+
+    std::pair<pointer, chunk_it> allocate(size_type obj_size)
+    {
+        for (auto it = m_chunks.begin(); it != m_chunks.end(); ++it) {
+            if (it->is_memory_available()) {
+                return make_pair(it->allocate(obj_size), it);
+            }
+        }
+        return make_pair(nullptr, m_chunks.end());
+    }
+
+    void deallocate(const pointer& ptr, size_type obj_size)
+    {
+        for (auto& chunk: m_chunks) {
+            if (chunk.is_owned(ptr, obj_size)) {
+                chunk.deallocate(ptr, obj_size);
+            }
+        }
+    }
+
+private:
+    pointer m_mem;
+    size_type m_size;
+    std::vector<chunk_type> m_chunks;
 };
 
 }
