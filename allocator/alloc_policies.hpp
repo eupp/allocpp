@@ -5,6 +5,7 @@
 #include <new>
 
 #include "alloc_traits.hpp"
+#include "none_policy.hpp"
 #include "macro.hpp"
 
 namespace alloc_utility
@@ -44,13 +45,13 @@ public:
     }
 
     template <typename U>
-    bool operator==(const default_allocation_policy::rebind<U>& other)
+    bool operator==(const default_allocation_policy::rebind<U>& other) const noexcept
     {
         return base_policy::operator==(other);
     }
 
     template <typename U>
-    bool operator!=(const default_allocation_policy::rebind<U>& other)
+    bool operator!=(const default_allocation_policy::rebind<U>& other) const noexcept
     {
         return base_policy::operator!=(other);
     }
@@ -88,13 +89,13 @@ public:
     }
 
     template <typename U>
-    bool operator==(const throw_bad_alloc_policy::rebind<U>& other)
+    bool operator==(const throw_bad_alloc_policy::rebind<U>& other) const noexcept
     {
         return base_policy::operator==(other);
     }
 
     template <typename U>
-    bool operator!=(const throw_bad_alloc_policy::rebind<U>& other)
+    bool operator!=(const throw_bad_alloc_policy::rebind<U>& other) const noexcept
     {
         return base_policy::operator!=(other);
     }
@@ -146,13 +147,13 @@ public:
     }
 
     template <typename U>
-    bool operator==(const logging_policy::rebind<U>& other)
+    bool operator==(const logging_policy::rebind<U>& other) const noexcept
     {
         return base_policy::operator==(other);
     }
 
     template <typename U>
-    bool operator!=(const logging_policy::rebind<U>& other)
+    bool operator!=(const logging_policy::rebind<U>& other) const noexcept
     {
         return base_policy::operator!=(other);
     }

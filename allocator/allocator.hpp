@@ -25,14 +25,12 @@ namespace details
     class policies_list<alloc_traits, alloc_policy, alloc_policies...>
             : public alloc_policy::template rebind_base<policies_list<alloc_traits, alloc_policies...>>
     {
-        typedef alloc_policy::template rebind_base<policies_list<alloc_traits, alloc_policies...>> base;
+        typedef typename alloc_policy::template rebind_base<policies_list<alloc_traits, alloc_policies...>> base;
 
     public:
 
         typedef typename alloc_traits::pointer pointer;
         typedef typename alloc_traits::size_type size_type;
-
-        typedef typename alloc_policy::template rebind_base<policies_list<alloc_traits, alloc_policies...>> base;
 
         template <typename U>
         using rebind = policies_list<
@@ -62,7 +60,7 @@ namespace details
     };
 
     template <typename alloc_traits>
-    class policies_list<alloc_traits>: public none_policy<alloc_traits::value_type, alloc_traits>
+    class policies_list<alloc_traits>: public none_policy<typename alloc_traits::value_type, alloc_traits>
     {
     public:
 

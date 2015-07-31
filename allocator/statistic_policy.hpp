@@ -87,12 +87,6 @@ public:
       , m_stat(other.m_stat)
     {}
 
-    template <typename U>
-    bool operator==(const statistic_policy::rebind<U>& other)
-    {
-        return true;
-    }
-
     pointer allocate(size_type n, const pointer& ptr, const_void_pointer hint = nullptr)
     {
         if (m_stat) {
@@ -125,11 +119,11 @@ private:
     statistic* m_stat;
 };
 
-template <typename T, typename U>
-bool operator==(const statistic_policy<T>& alloc1, const statistic_policy<U>& alloc2)
-{
+//template <typename T, typename U, template <typename> alloc_traits, template statistic, template base1, template base2
+//bool operator==(const statistic_policy<T>& alloc1, const statistic_policy<U>& alloc2)
+//{
 
-}
+//}
 
 } // namespace alloc_utility
 
