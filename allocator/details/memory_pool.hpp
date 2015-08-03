@@ -5,6 +5,7 @@
 #include <cassert>
 #include <limits>
 #include <vector>
+#include <list>
 #include <memory>
 #include <type_traits>
 #include <utility>
@@ -185,7 +186,7 @@ public:
     public:
         typedef typename std::vector<memory_block_type>::const_iterator memory_block_it;
 
-        memory_blocks_range(const memory_block_it& first, const memory_block_it& last):
+        memory_blocks_range(const memory_block_it& first, const memory_block_it& last) noexcept:
             m_begin(first)
           , m_end(last)
         {}
@@ -215,8 +216,13 @@ public:
         memory_block_it m_end;
     };
 
-    memory_pool(size_type obj_size):
+    explicit memory_pool(size_type obj_size) noexcept:
         m_obj_size(obj_size)
+    {}
+
+    memory_pool(memory_pool&& other) noexcept:
+        m_blocks(std::move(other.m_blocks))
+      , m_obj_size(other.m_obj_size)
     {}
 
     size_type obj_size() const noexcept
@@ -332,7 +338,125 @@ private:
     size_type m_obj_size;
 };
 
+template <typename pointer, typename size_type>
+class pools_manager
+{
+public:
 
+    typedef memory_pool<pointer, size_type> pool_type;
+    typedef std::pair<pool_type, int> pool_with_ref_count;
+
+    class iterator
+    {
+        typedef typename std::list<pool_with_ref_count>::iterator inner_iterator_type;
+
+    public:
+
+        iterator(const inner_iterator_type& it):
+            m_inner_it(it)
+        {}
+
+        pool_type& operator*() const noexcept
+        {
+            return m_inner_it->first;
+        }
+
+        pool_type* operator->() const noexcept
+        {
+            return &m_inner_it->first;
+        }
+
+        const iterator& operator++() noexcept
+        {
+            ++m_inner_it;
+            return *this;
+        }
+
+        iterator operator++(int) noexcept
+        {
+            iterator it = *this;
+            ++m_inner_it;
+            return it;
+        }
+
+        bool operator==(const iterator& other) const noexcept
+        {
+            return m_inner_it == other.m_inner_it;
+        }
+
+        bool operator!=(const iterator& other) const noexcept
+        {
+            return !operator==(other);
+        }
+
+    private:
+        inner_iterator_type m_inner_it;
+    };
+
+    friend bool operator==(const iterator& it1, const iterator& it2) noexcept
+    {
+        return it1.operator==(it2);
+    }
+
+    friend bool operator!=(const iterator& it1, const iterator& it2) noexcept
+    {
+        return it1.operator!=(it2);
+    }
+
+    pool_type* get_pool(size_type obj_size) noexcept
+    {
+        for (auto& pool_with_rc: m_pools) {
+            if (pool_with_rc.first.obj_size() == obj_size) {
+                ++pool_with_rc.second;
+                return &pool_with_rc.first;
+            }
+        }
+        pool_type new_pool(obj_size);
+        m_pools.emplace_back(std::move(new_pool), 1);
+        return &m_pools.back().first;
+    }
+
+    void release_pool(size_type obj_size) noexcept
+    {
+        for (auto& pool_with_rc: m_pools) {
+            if (pool_with_rc.first.obj_size() == obj_size) {
+                --pool_with_rc.second;
+            }
+        }
+    }
+
+    void erase_pool(size_type obj_size) noexcept
+    {
+        for (auto it = m_pools.begin(); it != m_pools.end(); ++it) {
+            if (it->first.obj_size() == obj_size) {
+                m_pools.erase(it);
+            }
+        }
+    }
+
+    int get_pool_ref_count(size_type obj_size) const noexcept
+    {
+        for (auto& pool_with_rc: m_pools) {
+            if (pool_with_rc.first.obj_size() == obj_size) {
+                return pool_with_rc.second;
+            }
+        }
+        return 0;
+    }
+
+    iterator begin() noexcept
+    {
+        return iterator(m_pools.begin());
+    }
+
+    iterator end() noexcept
+    {
+        return iterator(m_pools.end());
+    }
+
+private:
+    std::list<pool_with_ref_count> m_pools;
+};
 
 }   // namespace details
 

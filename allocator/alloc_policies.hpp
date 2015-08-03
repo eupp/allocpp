@@ -40,8 +40,10 @@ public:
 
     void deallocate(const pointer& ptr, size_type n)
     {
-        ::operator delete(static_cast<void*>(ptr));
-        base_policy::deallocate(ptr, n);
+        if (ptr) {
+            ::operator delete(static_cast<void*>(ptr));
+            base_policy::deallocate(ptr, n);
+        }
     }
 
     template <typename U>
