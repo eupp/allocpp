@@ -35,18 +35,25 @@ public:
       , m_block_size(block_size)
     {}
 
-    template <typename U>
-    pool_allocation_policy(const pool_allocation_policy::rebind<U>& other):
+    pool_allocation_policy(const pool_allocation_policy& other):
         base_policy(other)
       , m_manager(other.m_manager)
       , m_pool(m_manager->get_pool(sizeof(T)))
       , m_block_size(other.m_block_size)
     {}
 
+    template <typename U>
+    pool_allocation_policy(const pool_allocation_policy::rebind<U>& other):
+        base_policy(other)
+      , m_manager(other.m_manager)
+      , m_pool(m_manager->get_pool(sizeof(T)))
+      , m_block_size(other.block_size())
+    {}
+
     ~pool_allocation_policy()
     {
         m_manager->release_pool(sizeof(T));
-        if (m_manager->get_pool_ref_count(sizeof(T))) {
+        if (m_manager->get_pool_ref_count(sizeof(T)) == 0) {
             typename pool_type::memory_blocks_range mb_range = m_pool->get_mem_blocks();
             for (auto it = mb_range.begin(); it != mb_range.end(); ++it) {
                 pointer ptr = pointer_cast_traits<pointer, byte_pointer>::reinterpet_pointer_cast(it->get_memory_ptr());
@@ -71,6 +78,7 @@ public:
 
     void set_block_size(size_type block_size) noexcept
     {
+        assert(block_size > 0);
         m_block_size = block_size;
     }
 
@@ -80,8 +88,7 @@ public:
             return;
         }
         size_type size_diff = new_size - size();
-
-        m_pool->add_mem_block(base_policy::allocate(size_diff, pointer(nullptr)), size_diff);
+        add_mem_block(size_diff);
     }
 
     pointer allocate(size_type n, const pointer& ptr, const const_void_pointer& hint = nullptr)
@@ -93,8 +100,7 @@ public:
             return base_policy::allocate(n, ptr, hint);
         }
         if (!m_pool->is_memory_available()) {
-            pointer mem = base_policy::allocate(m_block_size, pointer(nullptr), hint);
-            m_pool->add_mem_block(pointer_cast_traits<byte_pointer, pointer>::reinterpet_pointer_cast(mem), m_block_size);
+            add_mem_block(m_block_size, hint);
         }
         return pointer_cast_traits<pointer, byte_pointer>::reinterpet_pointer_cast(m_pool->allocate());
     }
@@ -125,7 +131,17 @@ public:
         return (m_manager != other.m_manager) && base_policy::operator!=(other);
     }
 
+    template <typename, typename, typename>
+    friend class pool_allocation_policy;
+
 private:
+
+    void add_mem_block(size_type size, const const_void_pointer& hint = nullptr)
+    {
+        pointer mem = base_policy::allocate(size, pointer(nullptr), hint);
+        m_pool->add_mem_block(pointer_cast_traits<byte_pointer, pointer>::reinterpet_pointer_cast(mem), size);
+    }
+
     std::shared_ptr<pools_manager_type> m_manager;
     pool_type* m_pool;
     size_type m_block_size;

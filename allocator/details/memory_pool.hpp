@@ -430,6 +430,7 @@ public:
         for (auto it = m_pools.begin(); it != m_pools.end(); ++it) {
             if (it->first.obj_size() == obj_size) {
                 m_pools.erase(it);
+                return;
             }
         }
     }

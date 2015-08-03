@@ -115,6 +115,9 @@ public:
         m_stat = stat;
     }
 
+    template <typename, typename, typename, typename>
+    friend class statistic_policy;
+
 private:
     statistic* m_stat;
 };

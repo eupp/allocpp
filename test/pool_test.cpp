@@ -409,36 +409,6 @@ TEST_F(memory_pool_test, test_deallocate)
 //    bernulli_generator rand;
 //};
 
-//TEST_F(memory_pool_test, test_size)
-//{
-//    EXPECT_EQ(pool.size(), 0);
-//    for (int i = 0; i < 4 * CHUNK_SIZE; ++i) {
-//        pool.allocate();
-//    }
-//    pool.allocate();
-//    EXPECT_EQ(5 * CHUNK_SIZE, pool.size());
-//}
-
-//TEST_F(memory_pool_test, test_reserve)
-//{
-//    pool.reserve(2 * CHUNK_SIZE);
-//    EXPECT_EQ(2 * CHUNK_SIZE, pool.size());
-//    for (int i = 0; i < 2 * CHUNK_SIZE; ++i) {
-//        int* ptr = pool.allocate();
-//        EXPECT_NE(nullptr, ptr);
-//        *ptr = 42;
-//    }
-
-//    pool.reserve(CHUNK_SIZE);
-//    EXPECT_EQ(2 * CHUNK_SIZE, pool.size());
-
-//    int* ptr = pool.allocate();
-//    *ptr = 42;
-//    pool.reserve(5 * CHUNK_SIZE);
-//    EXPECT_EQ(5 * CHUNK_SIZE, pool.size());
-//    // check old memory is valid
-//    EXPECT_EQ(42, *ptr);
-//}
 
 //TEST_F(memory_pool_test, test_stress)
 //{
@@ -468,8 +438,15 @@ public:
                                         default_allocation_policy<int, allocation_traits<int>,
                                             statistic_policy<int>
                                         >
-                                  > allocator;
-    typedef typename allocator::statistic_type statistic;
+                                  > int_allocator;
+
+    typedef pool_allocation_policy<char, allocation_traits<char>,
+                                        default_allocation_policy<char, allocation_traits<char>,
+                                            statistic_policy<char>
+                                        >
+                                  > char_allocator;
+
+    typedef typename int_allocator::statistic_type statistic;
 
     pool_allocation_policy_test()
     {
@@ -477,7 +454,7 @@ public:
     }
 
     statistic stat;
-    allocator alloc;
+    int_allocator alloc;
 };
 
 TEST_F(pool_allocation_policy_test, test_allocate)
@@ -538,4 +515,83 @@ TEST_F(pool_allocation_policy_test, test_deallocate)
     EXPECT_EQ(1, stat.deallocs_count());
     EXPECT_EQ(1, stat.allocated_blocks_count());
     EXPECT_EQ(alloc.block_size() * sizeof(int), stat.mem_used());
+}
+
+TEST_F(pool_allocation_policy_test, test_block_size)
+{
+    EXPECT_EQ((size_t)int_allocator::DEFAULT_BLOCK_SIZE, alloc.block_size());
+    alloc.set_block_size(1);
+    EXPECT_EQ(1, alloc.block_size());
+}
+
+TEST_F(pool_allocation_policy_test, test_size)
+{
+    EXPECT_EQ(alloc.size(), 0);
+    for (int i = 0; i < 4 * alloc.block_size(); ++i) {
+        alloc.allocate(1, nullptr);
+    }
+    alloc.allocate(1, nullptr);
+    EXPECT_EQ(5 * alloc.block_size(), alloc.size());
+}
+
+TEST_F(pool_allocation_policy_test, test_reserve)
+{
+    alloc.reserve(2 * alloc.block_size());
+    EXPECT_EQ(2 * alloc.block_size(), alloc.size());
+    for (int i = 0; i < 2 * alloc.block_size(); ++i) {
+        int* ptr = alloc.allocate(1, nullptr);
+        EXPECT_NE(nullptr, ptr);
+        *ptr = 42;
+    }
+
+    alloc.reserve(alloc.block_size());
+    EXPECT_EQ(2 * alloc.block_size(), alloc.size());
+
+    int* ptr = alloc.allocate(1, nullptr);
+    *ptr = 42;
+    alloc.reserve(5 * alloc.block_size());
+    EXPECT_EQ(5 * alloc.block_size(), alloc.size());
+    // check old memory is valid
+    EXPECT_EQ(42, *ptr);
+}
+
+TEST_F(pool_allocation_policy_test, test_construct)
+{
+    int_allocator alloc_copy(alloc);
+    EXPECT_TRUE(alloc_copy.operator==(alloc));
+    EXPECT_TRUE(alloc.operator==(alloc_copy));
+    int* ptr = alloc_copy.allocate(1, nullptr);
+    EXPECT_EQ(1, stat.allocs_count());
+    EXPECT_EQ(1, stat.allocated_blocks_count());
+    EXPECT_EQ(alloc.block_size() * sizeof(int), stat.mem_used());
+
+    EXPECT_TRUE(alloc.operator==(alloc_copy));
+    alloc.deallocate(ptr, 1);
+    EXPECT_EQ(0, stat.deallocs_count());
+    EXPECT_EQ(1, stat.allocated_blocks_count());
+    EXPECT_EQ(alloc.block_size() * sizeof(int), stat.mem_used());
+
+    char_allocator char_alloc(alloc);
+    EXPECT_TRUE(int_allocator(char_alloc).operator==(alloc));
+    EXPECT_TRUE(char_alloc.operator==(char_allocator(alloc)));
+    char* char_ptr = char_alloc.allocate(1, nullptr);
+    EXPECT_EQ(2, stat.allocs_count());
+    EXPECT_EQ(2, stat.allocated_blocks_count());
+    EXPECT_EQ(alloc.block_size() * (sizeof(int) + sizeof(char)), stat.mem_used());
+
+    EXPECT_TRUE(int_allocator(char_alloc).operator==(alloc));
+    EXPECT_TRUE(char_alloc.operator==(char_allocator(alloc)));
+    alloc.deallocate(reinterpret_cast<int*>(char_ptr), 1);
+    EXPECT_EQ(0, stat.deallocs_count());
+    EXPECT_EQ(2, stat.allocated_blocks_count());
+    EXPECT_EQ(alloc.block_size() * (sizeof(int) + sizeof(char)), stat.mem_used());
+}
+
+TEST_F(pool_allocation_policy_test, test_destruct)
+{
+    alloc.reserve(100);
+    alloc.~pool_allocation_policy();
+    EXPECT_EQ(1, stat.deallocs_count());
+    EXPECT_EQ(0, stat.allocated_blocks_count());
+    EXPECT_EQ(0, stat.mem_used());
 }
