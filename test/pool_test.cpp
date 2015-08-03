@@ -98,6 +98,7 @@ TEST_F(chunk_test, test_allocate)
 
     for (int i = 0; i < CHUNK_SIZE - 2; ++i) {
         byte* ptr3 = chk.allocate(OBJ_SIZE);
+        EXPECT_TRUE(chk.is_owned(ptr3, OBJ_SIZE));
         *ptr3 = 42;
     }
 
@@ -210,6 +211,7 @@ TEST_F(memory_block_test, test_allocate)
 
     for (int i = 0; i < BLOCK_SIZE - 2; ++i) {
         byte* ptr3 = block.allocate(OBJ_SIZE).first;
+        EXPECT_TRUE(block.is_owned(ptr3, OBJ_SIZE));
         *ptr3 = 42;
     }
 
@@ -251,6 +253,137 @@ TEST_F(memory_block_test, test_stress)
             ASSERT_TRUE(block.is_memory_available());
         }
     }
+}
+
+class memory_pool_test: public ::testing::Test
+{
+public:
+
+    typedef std::uint8_t byte;
+
+    static const int BLOCK_SIZE = 4 * chunk<byte*, size_t>::CHUNK_MAXSIZE + 1;
+    static const int OBJ_SIZE = sizeof(int);
+    static const int OBJ_NUM = 10;
+
+    typedef details::memory_pool<byte*, size_t> pool_type;
+    typedef pool_type::memory_blocks_range mb_range_type;
+
+    memory_pool_test():
+        pool(OBJ_SIZE)
+      , mem1(new byte[OBJ_NUM * OBJ_SIZE])
+      , mem2(new byte[OBJ_NUM * OBJ_SIZE])
+    {}
+
+    ~memory_pool_test()
+    {
+        delete[] mem1;
+        delete[] mem2;
+    }
+
+    pool_type pool;
+    byte* mem1;
+    byte* mem2;
+};
+
+TEST_F(memory_pool_test, test_obj_size)
+{
+    EXPECT_EQ((size_t)OBJ_SIZE, pool.obj_size());
+}
+
+TEST_F(memory_pool_test, test_add_mem_block)
+{
+    EXPECT_EQ(0, pool.size());
+
+    pool.add_mem_block(mem1, OBJ_NUM);
+    EXPECT_EQ((size_t)OBJ_NUM, pool.size());
+
+    byte* mem2 = new byte[OBJ_NUM * OBJ_SIZE];
+    pool.add_mem_block(mem2, OBJ_NUM);
+    EXPECT_EQ(2 * OBJ_NUM, pool.size());
+}
+
+TEST_F(memory_pool_test, test_is_memory_available)
+{
+    pool.add_mem_block(mem1, OBJ_NUM);
+    EXPECT_TRUE(pool.is_memory_available());
+
+    for (int i = 0; i < OBJ_NUM; ++i) {
+        pool.allocate();
+    }
+    EXPECT_FALSE(pool.is_memory_available());
+
+    pool.add_mem_block(mem2, OBJ_NUM);
+    EXPECT_TRUE(pool.is_memory_available());
+}
+
+TEST_F(memory_pool_test, test_is_owned)
+{
+    pool.add_mem_block(mem1, OBJ_NUM);
+    EXPECT_TRUE(pool.is_owned(mem1));
+    EXPECT_FALSE(pool.is_owned(mem1 + OBJ_SIZE * (OBJ_NUM + 10)));
+    EXPECT_FALSE(pool.is_owned(mem1 - OBJ_SIZE));
+    EXPECT_FALSE(pool.is_owned(nullptr));
+    pool.add_mem_block(mem2, OBJ_NUM);
+    EXPECT_TRUE(pool.is_owned(mem1));
+    EXPECT_TRUE(pool.is_owned(mem2));
+}
+
+TEST_F(memory_pool_test, test_get_mem_blocks)
+{
+    pool.add_mem_block(mem1, OBJ_NUM);
+    pool.add_mem_block(mem2, OBJ_NUM);
+
+    mb_range_type blocks = pool.get_mem_blocks();
+    EXPECT_FALSE(blocks.is_empty());
+    EXPECT_EQ(2, blocks.count());
+    for (auto it = blocks.begin(); it != blocks.end(); ++it) {
+        byte* ptr = it->get_memory_ptr();
+        EXPECT_TRUE(ptr == mem1 || ptr == mem2);
+        EXPECT_EQ((size_t)OBJ_NUM, it->size());
+    }
+}
+
+TEST_F(memory_pool_test, test_allocate)
+{
+    pool.add_mem_block(mem1, OBJ_NUM);
+    pool.add_mem_block(mem2, OBJ_NUM);
+
+    byte* ptr1 = pool.allocate();
+    EXPECT_NE(nullptr, ptr1);
+    EXPECT_TRUE(pool.is_owned(ptr1));
+    // try dereference pointer
+    // in case of incorrect allocation it might cause segmentation fault
+    *ptr1 = 42;
+
+    byte* ptr2 = pool.allocate();
+    EXPECT_NE(nullptr, ptr2);
+    EXPECT_NE(ptr1, ptr2);
+    EXPECT_TRUE(pool.is_owned(ptr2));
+    *ptr2 = 42;
+
+    for (int i = 0; i < pool.size() - 2; ++i) {
+        byte* ptr3 = pool.allocate();
+        EXPECT_TRUE(pool.is_owned(ptr3));
+        *ptr3 = 42;
+    }
+
+    byte* ptr4 = pool.allocate();
+    EXPECT_EQ(nullptr, ptr4);
+}
+
+TEST_F(memory_pool_test, test_deallocate)
+{
+    pool.add_mem_block(mem1, OBJ_NUM);
+    byte* ptr = nullptr;
+    for (int i = 0; i < pool.size(); ++i) {
+        ptr = pool.allocate();
+    }
+    pool.deallocate(ptr);
+    EXPECT_TRUE(pool.is_memory_available());
+
+    ptr = nullptr;
+    ptr = pool.allocate();
+    EXPECT_NE(nullptr, ptr);
 }
 
 //class memory_pool_test: public ::testing::Test

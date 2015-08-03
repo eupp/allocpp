@@ -24,7 +24,8 @@ HEADERS += \
     allocator/pool_allocation.hpp \
     allocator/macro.hpp \
     allocator/statistic_policy.hpp \
-    allocator/none_policy.hpp
+    allocator/none_policy.hpp \
+    allocator/details/memory_pool.hpp
 
 INCLUDEPATH += allocator
 
