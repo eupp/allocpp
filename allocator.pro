@@ -25,9 +25,18 @@ HEADERS += \
     allocator/macro.hpp \
     allocator/statistic_policy.hpp \
     allocator/none_policy.hpp \
-    allocator/details/memory_pool.hpp
+    allocator/details/memory_pool.hpp \
+    include/allocator/allocator.hpp \
+    include/allocator/alloc_policies.hpp \
+    include/allocator/alloc_traits.hpp \
+    include/allocator/macro.hpp \
+    include/allocator/none_policy.hpp \
+    include/allocator/pointer_cast.hpp \
+    include/allocator/pool_allocation.hpp \
+    include/allocator/statistic_policy.hpp \
+    include/allocator/details/memory_pool.hpp
 
-INCLUDEPATH += allocator
+INCLUDEPATH += include/allocator
 
 LIBS += -lgtest -lgtest_main -pthread
 

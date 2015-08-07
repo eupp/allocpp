@@ -292,14 +292,14 @@ TEST_F(memory_pool_test, test_obj_size)
 
 TEST_F(memory_pool_test, test_add_mem_block)
 {
-    EXPECT_EQ(0, pool.size());
+    EXPECT_EQ(0, pool.capacity());
 
     pool.add_mem_block(mem1, OBJ_NUM);
-    EXPECT_EQ((size_t)OBJ_NUM, pool.size());
+    EXPECT_EQ((size_t)OBJ_NUM, pool.capacity());
 
     byte* mem2 = new byte[OBJ_NUM * OBJ_SIZE];
     pool.add_mem_block(mem2, OBJ_NUM);
-    EXPECT_EQ(2 * OBJ_NUM, pool.size());
+    EXPECT_EQ(2 * OBJ_NUM, pool.capacity());
 }
 
 TEST_F(memory_pool_test, test_is_memory_available)
@@ -361,7 +361,7 @@ TEST_F(memory_pool_test, test_allocate)
     EXPECT_TRUE(pool.is_owned(ptr2));
     *ptr2 = 42;
 
-    for (int i = 0; i < pool.size() - 2; ++i) {
+    for (int i = 0; i < pool.capacity() - 2; ++i) {
         byte* ptr3 = pool.allocate();
         EXPECT_TRUE(pool.is_owned(ptr3));
         *ptr3 = 42;
@@ -375,7 +375,7 @@ TEST_F(memory_pool_test, test_deallocate)
 {
     pool.add_mem_block(mem1, OBJ_NUM);
     byte* ptr = nullptr;
-    for (int i = 0; i < pool.size(); ++i) {
+    for (int i = 0; i < pool.capacity(); ++i) {
         ptr = pool.allocate();
     }
     pool.deallocate(ptr);
