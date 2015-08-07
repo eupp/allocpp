@@ -230,13 +230,13 @@ public:
         return m_obj_size;
     }
 
-    size_type size() const noexcept
+    size_type capacity() const noexcept
     {
-        size_type size = 0;
+        size_type cap = 0;
         for (auto& block: m_blocks) {
-            size += block.size();
+            cap += block.size();
         }
-        return size;
+        return cap;
     }
 
     bool is_memory_available() const noexcept

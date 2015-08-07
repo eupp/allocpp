@@ -66,9 +66,9 @@ public:
     pool_allocation_policy& operator=(const pool_allocation_policy&) = delete;
     pool_allocation_policy& operator=(pool_allocation_policy&&) = delete;
 
-    size_type size() const noexcept
+    size_type capacity() const noexcept
     {
-        return m_pool->size();
+        return m_pool->capacity();
     }
 
     size_type block_size() const noexcept
@@ -82,13 +82,13 @@ public:
         m_block_size = block_size;
     }
 
-    void reserve(size_type new_size)
+    void reserve(size_type new_capacity)
     {
-        if (new_size <= size()) {
+        if (new_capacity <= capacity()) {
             return;
         }
-        size_type size_diff = new_size - size();
-        add_mem_block(size_diff);
+        size_type cap_diff = new_capacity - capacity();
+        add_mem_block(cap_diff);
     }
 
     pointer allocate(size_type n, const pointer& ptr, const const_void_pointer& hint = nullptr)

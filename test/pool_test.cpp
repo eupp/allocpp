@@ -386,50 +386,6 @@ TEST_F(memory_pool_test, test_deallocate)
     EXPECT_NE(nullptr, ptr);
 }
 
-//class memory_pool_test: public ::testing::Test
-//{
-//public:
-
-//    typedef default_allocation_policy<int, allocation_traits<int>, statistic_policy<int>> alloc_policy;
-//    typedef details::memory_pool<int, alloc_policy> pool_type;
-//    typedef typename alloc_policy::statistic_type statistic;
-
-//    static const int CHUNK_SIZE = pool_type::CHUNK_SIZE;
-
-//    memory_pool_test():
-//        pool(&alloc)
-//      , rand(0.75)
-//    {
-//        alloc.set_statistic(&stat);
-//    }
-
-//    statistic stat;
-//    alloc_policy alloc;
-//    pool_type pool;
-//    bernulli_generator rand;
-//};
-
-
-//TEST_F(memory_pool_test, test_stress)
-//{
-//    const int ITER_COUNT = 2000;
-//    std::stack<int*> st;
-//    for (int i = 0; i < ITER_COUNT; ++i) {
-//        if (rand()) {
-//            int* ptr = pool.allocate();
-//            ASSERT_NE(nullptr, ptr);
-//            // try dereference pointer
-//            // in case of incorrect allocation it might cause segmentation fault
-//            *ptr = 42;
-//            st.push(ptr);
-//        } else if (!st.empty()) {
-//            int* ptr = st.top();
-//            st.pop();
-//            pool.deallocate(ptr);
-//        }
-//    }
-//}
-
 class pool_allocation_policy_test: public ::testing::Test
 {
 public:
@@ -524,20 +480,20 @@ TEST_F(pool_allocation_policy_test, test_block_size)
     EXPECT_EQ(1, alloc.block_size());
 }
 
-TEST_F(pool_allocation_policy_test, test_size)
+TEST_F(pool_allocation_policy_test, test_capacity)
 {
-    EXPECT_EQ(alloc.size(), 0);
+    EXPECT_EQ(alloc.capacity(), 0);
     for (int i = 0; i < 4 * alloc.block_size(); ++i) {
         alloc.allocate(1, nullptr);
     }
     alloc.allocate(1, nullptr);
-    EXPECT_EQ(5 * alloc.block_size(), alloc.size());
+    EXPECT_EQ(5 * alloc.block_size(), alloc.capacity());
 }
 
 TEST_F(pool_allocation_policy_test, test_reserve)
 {
     alloc.reserve(2 * alloc.block_size());
-    EXPECT_EQ(2 * alloc.block_size(), alloc.size());
+    EXPECT_EQ(2 * alloc.block_size(), alloc.capacity());
     for (int i = 0; i < 2 * alloc.block_size(); ++i) {
         int* ptr = alloc.allocate(1, nullptr);
         EXPECT_NE(nullptr, ptr);
@@ -545,12 +501,12 @@ TEST_F(pool_allocation_policy_test, test_reserve)
     }
 
     alloc.reserve(alloc.block_size());
-    EXPECT_EQ(2 * alloc.block_size(), alloc.size());
+    EXPECT_EQ(2 * alloc.block_size(), alloc.capacity());
 
     int* ptr = alloc.allocate(1, nullptr);
     *ptr = 42;
     alloc.reserve(5 * alloc.block_size());
-    EXPECT_EQ(5 * alloc.block_size(), alloc.size());
+    EXPECT_EQ(5 * alloc.block_size(), alloc.capacity());
     // check old memory is valid
     EXPECT_EQ(42, *ptr);
 }
