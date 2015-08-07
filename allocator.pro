@@ -34,7 +34,8 @@ HEADERS += \
     include/allocator/pointer_cast.hpp \
     include/allocator/pool_allocation.hpp \
     include/allocator/statistic_policy.hpp \
-    include/allocator/details/memory_pool.hpp
+    include/allocator/details/memory_pool.hpp \
+    include/allocator/details/policies_list.hpp
 
 INCLUDEPATH += include/allocator
 
