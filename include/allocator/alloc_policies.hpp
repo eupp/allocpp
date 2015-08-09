@@ -46,14 +46,12 @@ public:
         }
     }
 
-    template <typename U>
-    bool operator==(const default_allocation_policy::rebind<U>& other) const noexcept
+    bool operator==(const default_allocation_policy& other) const noexcept
     {
         return base_policy::operator==(other);
     }
 
-    template <typename U>
-    bool operator!=(const default_allocation_policy::rebind<U>& other) const noexcept
+    bool operator!=(const default_allocation_policy& other) const noexcept
     {
         return base_policy::operator!=(other);
     }
@@ -90,14 +88,12 @@ public:
         base_policy::deallocate(ptr, n);
     }
 
-    template <typename U>
-    bool operator==(const throw_bad_alloc_policy::rebind<U>& other) const noexcept
+    bool operator==(const throw_bad_alloc_policy& other) const noexcept
     {
         return base_policy::operator==(other);
     }
 
-    template <typename U>
-    bool operator!=(const throw_bad_alloc_policy::rebind<U>& other) const noexcept
+    bool operator!=(const throw_bad_alloc_policy& other) const noexcept
     {
         return base_policy::operator!=(other);
     }
@@ -148,14 +144,12 @@ public:
         m_log = log;
     }
 
-    template <typename U>
-    bool operator==(const logging_policy::rebind<U>& other) const noexcept
+    bool operator==(const logging_policy& other) const noexcept
     {
         return base_policy::operator==(other);
     }
 
-    template <typename U>
-    bool operator!=(const logging_policy::rebind<U>& other) const noexcept
+    bool operator!=(const logging_policy& other) const noexcept
     {
         return base_policy::operator!=(other);
     }

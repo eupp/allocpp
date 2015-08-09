@@ -42,13 +42,17 @@ public:
       , m_block_size(other.m_block_size)
     {}
 
-    template <typename U>
-    pool_allocation_policy(const pool_allocation_policy::rebind<U>& other):
+    template <typename rebinded_alloc>
+    pool_allocation_policy(const rebinded_alloc& other):
         base_policy(other)
       , m_manager(other.m_manager)
       , m_pool(m_manager->get_pool(sizeof(T)))
       , m_block_size(other.block_size())
-    {}
+    {
+//        static_assert(std::is_same<rebinded_alloc, rebind<typename rebinded_alloc::value_type>>::value,
+//                "Copy constructor parameter should be rebinded allocation policy");
+        CHECK_IS_REBINDED_ALLOC(rebinded_alloc);
+    }
 
     ~pool_allocation_policy()
     {

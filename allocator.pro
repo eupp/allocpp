@@ -9,7 +9,9 @@ SOURCES += \
     test/policies_test.cpp \
     test/pool_test.cpp \
     test/statistic_policy_test.cpp \
-    test/stl_test.cpp
+    test/stl_test.cpp \
+    test/alloc_type_traits_test.cpp \
+    test/rebind_test.cpp
 
 HEADERS += \
     allocator.hpp \
@@ -35,7 +37,10 @@ HEADERS += \
     include/allocator/pool_allocation.hpp \
     include/allocator/statistic_policy.hpp \
     include/allocator/details/memory_pool.hpp \
-    include/allocator/details/policies_list.hpp
+    include/allocator/details/policies_list.hpp \
+    include/allocator/alloc_type_traits.hpp \
+    include/allocator/details/rebind.hpp \
+    test/test_types.hpp
 
 INCLUDEPATH += include/allocator
 

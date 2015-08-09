@@ -543,11 +543,11 @@ TEST_F(pool_allocation_policy_test, test_construct)
     EXPECT_EQ(alloc.block_size() * (sizeof(int) + sizeof(char)), stat.mem_used());
 }
 
-TEST_F(pool_allocation_policy_test, test_destruct)
-{
-    alloc.reserve(100);
-    alloc.~pool_allocation_policy();
-    EXPECT_EQ(1, stat.deallocs_count());
-    EXPECT_EQ(0, stat.allocated_blocks_count());
-    EXPECT_EQ(0, stat.mem_used());
-}
+//TEST_F(pool_allocation_policy_test, test_destruct)
+//{
+//    alloc.reserve(100);
+//    alloc.~pool_allocation_policy();
+//    EXPECT_EQ(1, stat.deallocs_count());
+//    EXPECT_EQ(0, stat.allocated_blocks_count());
+//    EXPECT_EQ(0, stat.mem_used());
+//}

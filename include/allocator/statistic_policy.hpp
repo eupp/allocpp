@@ -16,9 +16,6 @@ class basic_statistic
 {
 public:
 
-    template <typename U>
-    using rebind = basic_statistic;
-
     basic_statistic() noexcept:
         m_allocs_count(0)
       , m_deallocs_count(0)
