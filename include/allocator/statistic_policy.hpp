@@ -79,7 +79,7 @@ public:
     {}
 
     template <typename U>
-    statistic_policy(const statistic_policy::rebind<U>& other):
+    statistic_policy(const rebind<U>& other):
         base_policy(other)
       , m_stat(other.m_stat)
     {}

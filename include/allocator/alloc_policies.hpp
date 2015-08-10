@@ -23,7 +23,7 @@ public:
     default_allocation_policy() = default;
 
     template <typename U>
-    default_allocation_policy(const default_allocation_policy::rebind<U>& other):
+    default_allocation_policy(const rebind<U>& other):
         base_policy(other)
     {
         ALLOC_UNUSED(other);
@@ -69,7 +69,7 @@ public:
     throw_bad_alloc_policy() = default;
 
     template <typename U>
-    throw_bad_alloc_policy(const throw_bad_alloc_policy::rebind<U>& other):
+    throw_bad_alloc_policy(const rebind<U>& other):
         base_policy(other)
     {
         ALLOC_UNUSED(other);
@@ -113,7 +113,7 @@ public:
     {}
 
     template <typename U>
-    logging_policy(const logging_policy::rebind<U>& other):
+    logging_policy(const rebind<U>& other):
         base_policy(other)
       , m_log(other.m_log)
     {}

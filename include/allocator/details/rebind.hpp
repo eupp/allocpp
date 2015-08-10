@@ -27,22 +27,6 @@ struct enable_rebind<X, U, typename std::enable_if<has_rebind<X>::value>::type>
     typedef typename X::template rebind<U> type;
 };
 
-// helper struct for iterating through list of types and substituting them with rebind type.
-// consider rebind_helper_<2, alloc, U, T1, T2> and suppose T1 has inner template rebind and T2 not,
-// then rebind_helper_<2, alloc, U, T1, T2>::type will be equal to alloc<U, T1::rebind<U>, T2>
-
-template <int N, template <typename...> class alloc, typename U, typename head_type, typename... types>
-struct rebind_helper
-{
-    typedef typename rebind_helper<N-1, alloc, U, types..., typename enable_rebind<head_type, U>::type>::type type;
-};
-
-template <template <typename...> class alloc, typename U, typename head_type, typename... types>
-struct rebind_helper<0, alloc, U, head_type, types...>
-{
-    typedef alloc<U, head_type, types...> type;
-};
-
 // helper struct for replacng last type from variadic template list with rebind_type
 
 template <int N, template <typename...> class alloc, typename T, typename rebind_type, typename head_type, typename... types>
@@ -64,9 +48,11 @@ struct rebind_base_helper<0, alloc, T, rebind_type, head_type>
 };
 
 // helper alias for declaring rebind types
+// consider rebind<alloc, U, T1, T2> and suppose T1 has inner template rebind and T2 not,
+// then rebind<alloc, U, T1, T2>::type will be equal to alloc<U, T1::rebind<U>, T2>
 
 template <template <typename...> class alloc, typename U, typename... types>
-using rebind = typename rebind_helper<sizeof...(types), alloc, U, types...>::type;
+using rebind = alloc<U, typename enable_rebind<types, U>::type...>;
 
 // helper alias for declaring rebind_base
 
