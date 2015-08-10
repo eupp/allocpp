@@ -3,6 +3,7 @@
 
 #include <type_traits>
 
+#include "none_policy.hpp"
 #include "alloc_type_traits.hpp"
 
 namespace alloc_utility
@@ -10,19 +11,6 @@ namespace alloc_utility
 
 namespace details
 {
-
-    template <bool Cond, class T = void>
-    struct disable_if
-    {
-        typedef T type;
-    };
-
-    template <class T>
-    struct disable_if<true, T>
-    {
-//        typedef T type;
-    };
-
     // helper class for iterate through policies
     // it keeps information about types of policies
 
@@ -48,6 +36,21 @@ namespace details
                                         typename alloc_policy::template rebind<U>,
                                         typename alloc_policies::template rebind<U>...
                                     >;
+
+        typedef std::integral_constant<bool,
+                enable_propagate_on_copy<alloc_policy>::value
+                || super_base::propagate_on_container_copy_assignment::value
+            > propagate_on_container_copy_assignment;
+
+        typedef std::integral_constant<bool,
+                enable_propagate_on_move<alloc_policy>::value
+                || super_base::propagate_on_container_move_assignment::value
+            > propagate_on_container_move_assignment;
+
+        typedef std::integral_constant<bool,
+                enable_propagate_on_move<alloc_policy>::value
+                || super_base::propagate_on_container_swap::value
+            > propagate_on_container_swap;
 
         policies_list() = default;
 

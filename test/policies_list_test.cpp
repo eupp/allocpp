@@ -30,3 +30,15 @@ TEST_F(policies_list_test, test_comparison_ops)
     EXPECT_FALSE(ps_list1.operator==(ps_list2));
     EXPECT_TRUE(ps_list1.operator!=(ps_list2));
 }
+
+TEST_F(policies_list_test, test_propagate_on)
+{
+    EXPECT_TRUE(ps_list_t::propagate_on_container_copy_assignment::value);
+    EXPECT_TRUE(ps_list_t::propagate_on_container_move_assignment::value);
+    EXPECT_TRUE(ps_list_t::propagate_on_container_swap::value);
+
+    typedef policies_list<allocation_traits<int>, int_poorly_defined_policy> poor_ps_list_t;
+    EXPECT_FALSE(poor_ps_list_t::propagate_on_container_copy_assignment::value);
+    EXPECT_FALSE(poor_ps_list_t::propagate_on_container_move_assignment::value);
+    EXPECT_FALSE(poor_ps_list_t::propagate_on_container_swap::value);
+}

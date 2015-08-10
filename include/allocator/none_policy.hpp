@@ -18,6 +18,10 @@ public:
     template <typename policy>
     using rebind_base = none_policy<T, alloc_traits>;
 
+    typedef std::false_type propagate_on_container_copy_assignment;
+    typedef std::false_type propagate_on_container_move_assignment;
+    typedef std::false_type propagate_on_container_swap;
+
     none_policy() = default;
 
     template <typename U>

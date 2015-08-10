@@ -1,6 +1,8 @@
 #ifndef TEST_TYPES_HPP
 #define TEST_TYPES_HPP
 
+#include <type_traits>
+
 #include "alloc_traits.hpp"
 #include "none_policy.hpp"
 #include "macro.hpp"
@@ -38,6 +40,10 @@ struct well_defined_policy: public base_policy
 
     well_defined_policy() = default;
     well_defined_policy(const well_defined_policy&) = default;
+
+    typedef std::true_type propagate_on_container_copy_assignment;
+    typedef std::true_type propagate_on_container_move_assignment;
+    typedef std::true_type propagate_on_container_swap;
 
     template <typename U>
     well_defined_policy(const rebind<U>& other):
