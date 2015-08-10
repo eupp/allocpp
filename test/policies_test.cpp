@@ -26,5 +26,6 @@ TEST(policies_test, test_bad_alloc_exc)
                      > throwing_allocator;
     throwing_allocator alloc;
     EXPECT_THROW(alloc.allocate(1), std::bad_alloc);
+    alloc.deallocate(nullptr, 0);
 }
 

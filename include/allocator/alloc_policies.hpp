@@ -72,11 +72,6 @@ public:
         }
         return base_policy::allocate(n, ptr, hint);
     }
-
-    void deallocate(const pointer& ptr, size_type n)
-    {
-        base_policy::deallocate(ptr, n);
-    }
 };
 
 template <typename T, typename alloc_traits = allocation_traits<T>,

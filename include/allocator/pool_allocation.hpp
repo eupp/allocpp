@@ -27,6 +27,10 @@ public:
     DECLARE_ALLOC_TRAITS(T, alloc_traits)
     DECLARE_REBIND_ALLOC(pool_allocation_policy, T, alloc_traits, base_policy)
 
+    typedef std::true_type propagate_on_container_copy_assignment;
+    typedef std::true_type propagate_on_container_move_assignment;
+    typedef std::true_type propagate_on_container_swap;
+
     static const size_type DEFAULT_BLOCK_SIZE = pool_type::memory_block_type::chunk_type::CHUNK_MAXSIZE;
 
     explicit pool_allocation_policy(size_type block_size = DEFAULT_BLOCK_SIZE):
