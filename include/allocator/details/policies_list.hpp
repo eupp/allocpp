@@ -1,11 +1,27 @@
 #ifndef POLICIES_LIST_HPP
 #define POLICIES_LIST_HPP
 
+#include <type_traits>
+
+#include "alloc_type_traits.hpp"
+
 namespace alloc_utility
 {
 
 namespace details
 {
+
+    template <bool Cond, class T = void>
+    struct disable_if
+    {
+        typedef T type;
+    };
+
+    template <class T>
+    struct disable_if<true, T>
+    {
+//        typedef T type;
+    };
 
     // helper class for iterate through policies
     // it keeps information about types of policies
@@ -19,6 +35,7 @@ namespace details
             : public alloc_policy::template rebind_base<policies_list<alloc_traits, alloc_policies...>>
     {
         typedef typename alloc_policy::template rebind_base<policies_list<alloc_traits, alloc_policies...>> base;
+        typedef policies_list<alloc_traits, alloc_policies...> super_base;
 
     public:
 
@@ -35,20 +52,48 @@ namespace details
         policies_list() = default;
 
         template <typename U>
-        policies_list(const policies_list::rebind<U>& other):
+        policies_list(const rebind<U>& other):
             base(other)
         {}
 
-        template <typename U>
-        bool operator==(const policies_list::rebind<U>& other) const noexcept
+        bool operator==(const policies_list& other) const
         {
-            return base::operator==(other);
+            return equal_to_helper<alloc_policy>(other);
         }
 
-        template <typename U>
-        bool operator!=(const policies_list::rebind<U>& other) const noexcept
+        bool operator!=(const policies_list& other) const
         {
-            return base::operator!=(other);
+            return not_equal_to_helper<alloc_policy>(other);
+        }
+
+    private:
+
+        template <typename policy>
+        auto equal_to_helper(const policies_list& other) const
+            -> typename std::enable_if<has_equal_to_op<policy>::value, bool>::type
+        {
+            return base::operator==(other) && super_base::operator==(other);
+        }
+
+        template <typename policy>
+        auto equal_to_helper(const policies_list& other) const
+            -> typename std::enable_if<!has_equal_to_op<policy>::value, bool>::type
+        {
+            return super_base::operator==(other);
+        }
+
+        template <typename policy>
+        auto not_equal_to_helper(const policies_list& other) const
+            -> typename std::enable_if<has_not_equal_to_op<policy>::value, bool>::type
+        {
+            return base::operator!=(other) || super_base::operator!=(other);
+        }
+
+        template <typename policy>
+        auto not_equal_to_helper(const policies_list& other) const
+            -> typename std::enable_if<!has_not_equal_to_op<policy>::value, bool>::type
+        {
+            return super_base::operator!=(other);
         }
     };
 

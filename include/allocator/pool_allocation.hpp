@@ -121,14 +121,14 @@ public:
         base_policy::deallocate(ptr, n);
     }
 
-    bool operator==(const pool_allocation_policy& other)
+    bool operator==(const pool_allocation_policy& other) const noexcept
     {
-        return (m_manager == other.m_manager) && base_policy::operator==(other);
+        return (m_manager == other.m_manager);
     }
 
-    bool operator!=(const pool_allocation_policy& other)
+    bool operator!=(const pool_allocation_policy& other) const noexcept
     {
-        return (m_manager != other.m_manager) && base_policy::operator!=(other);
+        return !operator==(other);
     }
 
     template <typename, typename, typename>

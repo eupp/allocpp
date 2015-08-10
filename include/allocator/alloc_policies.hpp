@@ -45,16 +45,6 @@ public:
             base_policy::deallocate(ptr, n);
         }
     }
-
-    bool operator==(const default_allocation_policy& other) const noexcept
-    {
-        return base_policy::operator==(other);
-    }
-
-    bool operator!=(const default_allocation_policy& other) const noexcept
-    {
-        return base_policy::operator!=(other);
-    }
 };
 
 template <typename T, typename alloc_traits = allocation_traits<T>,
@@ -86,16 +76,6 @@ public:
     void deallocate(const pointer& ptr, size_type n)
     {
         base_policy::deallocate(ptr, n);
-    }
-
-    bool operator==(const throw_bad_alloc_policy& other) const noexcept
-    {
-        return base_policy::operator==(other);
-    }
-
-    bool operator!=(const throw_bad_alloc_policy& other) const noexcept
-    {
-        return base_policy::operator!=(other);
     }
 };
 
@@ -142,16 +122,6 @@ public:
     void set_log(std::ostream* log)
     {
         m_log = log;
-    }
-
-    bool operator==(const logging_policy& other) const noexcept
-    {
-        return base_policy::operator==(other);
-    }
-
-    bool operator!=(const logging_policy& other) const noexcept
-    {
-        return base_policy::operator!=(other);
     }
 
 private:

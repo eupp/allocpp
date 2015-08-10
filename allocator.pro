@@ -11,7 +11,8 @@ SOURCES += \
     test/statistic_policy_test.cpp \
     test/stl_test.cpp \
     test/alloc_type_traits_test.cpp \
-    test/rebind_test.cpp
+    test/rebind_test.cpp \
+    test/policies_list_test.cpp
 
 HEADERS += \
     allocator.hpp \

@@ -31,6 +31,28 @@ template <typename T>
 struct has_rebind<T, details::void_t<typename T::template rebind<details::placeholder>>>: std::true_type
 {};
 
+template <typename T, typename = void>
+struct has_equal_to_op: std::false_type
+{};
+
+template <typename T>
+struct has_equal_to_op<
+        T,
+        details::void_t<decltype(std::declval<T>() == std::declval<T>())>
+    >: std::is_same<bool, decltype(std::declval<T>() == std::declval<T>())>
+{};
+
+template <typename T, typename = void>
+struct has_not_equal_to_op: std::false_type
+{};
+
+template <typename T>
+struct has_not_equal_to_op<
+        T,
+        details::void_t<decltype(std::declval<T>() != std::declval<T>())>
+    >: std::is_same<bool, decltype(std::declval<T>() != std::declval<T>())>
+{};
+
 } // namespace alloc_utility
 
 #endif // ALLOC_TYPE_TRAITS_HPP

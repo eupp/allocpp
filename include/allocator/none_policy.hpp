@@ -39,19 +39,6 @@ public:
         ALLOC_UNUSED(n);
         return;
     }
-
-    template <typename U>
-    bool operator==(const none_policy::rebind<U>& other) const noexcept
-    {
-        ALLOC_UNUSED(other);
-        return true;
-    }
-
-    template <typename U>
-    bool operator!=(const none_policy::rebind<U>& other) const noexcept
-    {
-        return !operator==(other);
-    }
 };
 
 }

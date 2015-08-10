@@ -25,8 +25,8 @@ TEST(rebind_test, test_enable_rebind)
     EXPECT_TRUE(is_same1);
 
     bool is_same2 = std::is_same<
-                                 typename enable_rebind<class_without_rebind, int>::type,
-                                 class_without_rebind
+                                 typename enable_rebind<empty_class, int>::type,
+                                 empty_class
                                 >::value;
     EXPECT_TRUE(is_same2);
 }
@@ -34,11 +34,11 @@ TEST(rebind_test, test_enable_rebind)
 TEST(rebind_test, test_rebind)
 {
     typedef allocator<
-                        char, class_with_rebind::rebind<char>, class_without_rebind
+                        char, class_with_rebind::rebind<char>, empty_class
                      > rebinded_allocator;
 
     bool is_same = std::is_same<
-                                   rebind<allocator, char, class_with_rebind, class_without_rebind>,
+                                   rebind<allocator, char, class_with_rebind, empty_class>,
                                    rebinded_allocator
                                >::value;
     EXPECT_TRUE(is_same);
