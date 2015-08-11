@@ -9,7 +9,7 @@ namespace alloc_utility
 
 template <typename T, typename alloc_traits = allocation_traits<T>,
           typename base_policy = default_allocation_policy<T, alloc_traits>>
-class linear_allocation_policy
+class linear_allocation_policy: public base_policy
 {
 public:
 
@@ -35,6 +35,9 @@ public:
 
     linear_allocation_policy& operator=(const linear_allocation_policy&) = delete;
     linear_allocation_policy& operator=(linear_allocation_policy&&) = delete;
+
+    bool is_memory_available(size_type size) const noexcept
+    {}
 
     size_type storage_size() const noexcept
     {}

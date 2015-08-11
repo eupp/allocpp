@@ -12,7 +12,7 @@ class linear_storage
 {
 public:
 
-    linear_storage():
+    linear_storage() noexcept:
         m_storage(nullptr)
       , m_storage_size(0)
       , m_offset(0)
@@ -33,19 +33,19 @@ public:
         return m_storage && (m_storage <= ptr) && (ptr < m_storage + m_storage_size);
     }
 
-    pointer get_storage() const
+    pointer get_storage() const noexcept
     {
         return m_storage;
     }
 
-    void set_storage(const pointer& storage, size_type size)
+    void set_storage(const pointer& storage, size_type size) noexcept
     {
         m_storage = storage;
         m_storage_size = size;
         m_offset = 0;
     }
 
-    pointer allocate(size_type size)
+    pointer allocate(size_type size) noexcept
     {
         pointer ptr = m_storage + m_offset;
         m_offset += size;

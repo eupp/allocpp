@@ -512,7 +512,14 @@ TEST_F(pool_allocation_policy_test, test_reserve)
     EXPECT_EQ(42, *ptr);
 }
 
-TEST_F(pool_allocation_policy_test, test_construct)
+TEST_F(pool_allocation_policy_test, test_comparison)
+{
+    int_allocator other;
+    EXPECT_TRUE(alloc.operator==(alloc));
+    EXPECT_TRUE(alloc.operator!=(other));
+}
+
+TEST_F(pool_allocation_policy_test, test_copy_construct)
 {
     int_allocator alloc_copy(alloc);
     EXPECT_TRUE(alloc_copy.operator==(alloc));
