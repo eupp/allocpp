@@ -551,11 +551,43 @@ TEST_F(pool_allocation_policy_test, test_copy_construct)
     EXPECT_EQ(alloc.block_size() * (sizeof(int) + sizeof(char)), stat.mem_used());
 }
 
+TEST_F(pool_allocation_policy_test, test_move_construct)
+{
+    int* ptr1 = alloc.allocate(1, nullptr);
+    int_allocator alloc_copy(std::move(alloc));
+    EXPECT_EQ(alloc_copy.block_size(), alloc_copy.capacity());
+    alloc_copy.deallocate(ptr1, 1);
+    EXPECT_EQ(0, stat.deallocs_count());
+    EXPECT_EQ(1, stat.allocated_blocks_count());
+    EXPECT_EQ(alloc.block_size() * sizeof(int), stat.mem_used());
+}
+
+TEST_F(pool_allocation_policy_test, test_swap)
+{
+    int_allocator other;
+    other.set_statistic(&stat);
+    other.reserve(2 * alloc.block_size());
+    int* ptr1 = other.allocate(1, nullptr);
+
+    swap(alloc, other);
+    EXPECT_EQ(2 * alloc.block_size(), alloc.capacity());
+    EXPECT_EQ(0, other.capacity());
+
+    alloc.deallocate(ptr1, 1);
+    EXPECT_EQ(0, stat.deallocs_count());
+    EXPECT_EQ(1, stat.allocated_blocks_count());
+    EXPECT_EQ(2 * alloc.block_size() * sizeof(int), stat.mem_used());
+}
+
 TEST_F(pool_allocation_policy_test, test_destruct)
 {
-    alloc.reserve(100);
-    alloc.~pool_allocation_policy();
-    EXPECT_EQ(1, stat.deallocs_count());
-    EXPECT_EQ(0, stat.allocated_blocks_count());
-    EXPECT_EQ(0, stat.mem_used());
+    statistic s;
+    if (true) {
+        int_allocator a;
+        a.set_statistic(&s);
+        a.reserve(100);
+    }
+    EXPECT_EQ(1, s.deallocs_count());
+    EXPECT_EQ(0, s.allocated_blocks_count());
+    EXPECT_EQ(0, s.mem_used());
 }

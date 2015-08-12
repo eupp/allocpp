@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <list>
 #include <memory>
+#include <utility>
 
 #include "alloc_traits.hpp"
 #include "alloc_policies.hpp"
@@ -46,16 +47,26 @@ public:
       , m_block_size(other.m_block_size)
     {}
 
+    pool_allocation_policy(pool_allocation_policy&& other) noexcept:
+        base_policy(std::move(other))
+      , m_manager(std::move(other.m_manager))
+      , m_pool(other.m_pool)
+      , m_block_size(other.m_block_size)
+    {}
+
     template <typename U>
     pool_allocation_policy(const rebind<U>& other):
         base_policy(other)
       , m_manager(other.m_manager)
       , m_pool(m_manager->get_pool(sizeof(T)))
-      , m_block_size(other.block_size())
+      , m_block_size(other.m_block_size)
     {}
 
     ~pool_allocation_policy()
     {
+        if (!m_manager) {
+            return;
+        }
         m_manager->release_pool(sizeof(T));
         if (m_manager->get_pool_ref_count(sizeof(T)) == 0) {
             typename pool_type::memory_blocks_range mb_range = m_pool->get_mem_blocks();
@@ -67,8 +78,19 @@ public:
         }
     }
 
-    pool_allocation_policy& operator=(const pool_allocation_policy&) = delete;
-    pool_allocation_policy& operator=(pool_allocation_policy&&) = delete;
+    pool_allocation_policy& operator=(pool_allocation_policy other)
+    {
+        other.swap(*this);
+        return *this;
+    }
+
+    void swap(pool_allocation_policy& other)
+    {
+        using std::swap;
+        swap(m_manager, other.m_manager);
+        swap(m_pool, other.m_pool);
+        swap(m_block_size, other.m_block_size);
+    }
 
     size_type capacity() const noexcept
     {
@@ -150,6 +172,13 @@ private:
     pool_type* m_pool;
     size_type m_block_size;
 };
+
+template <typename T, typename alloc_traits, typename base_policy>
+void swap(pool_allocation_policy<T, alloc_traits, base_policy>& alloc1,
+          pool_allocation_policy<T, alloc_traits, base_policy>& alloc2)
+{
+    alloc1.swap(alloc2);
+}
 
 } // namespace alloc_utility
 

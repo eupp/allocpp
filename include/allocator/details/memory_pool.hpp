@@ -31,7 +31,7 @@ public:
 
     static const int CHUNK_MAXSIZE = std::numeric_limits<std::uint8_t>::max();
 
-    chunk(pointer ptr, size_type obj_size, std::uint8_t chunk_size = CHUNK_MAXSIZE):
+    chunk(pointer ptr, size_type obj_size, std::uint8_t chunk_size = CHUNK_MAXSIZE) noexcept:
         m_chunk(ptr)
       , m_head(0)
       , m_available(chunk_size)
@@ -105,7 +105,7 @@ public:
     typedef chunk<pointer, size_type> chunk_type;
     typedef typename std::vector<chunk_type>::iterator chunk_it;
 
-    memory_block(pointer mem, size_type obj_size, size_type obj_num):
+    memory_block(pointer mem, size_type obj_size, size_type obj_num) noexcept:
         m_mem(mem)
       , m_size(obj_num)
     {
@@ -352,7 +352,7 @@ public:
 
     public:
 
-        iterator(const inner_iterator_type& it):
+        iterator(const inner_iterator_type& it) noexcept:
             m_inner_it(it)
         {}
 
@@ -403,7 +403,7 @@ public:
         return it1.operator!=(it2);
     }
 
-    pool_type* get_pool(size_type obj_size) noexcept
+    pool_type* get_pool(size_type obj_size)
     {
         for (auto& pool_with_rc: m_pools) {
             if (pool_with_rc.first.obj_size() == obj_size) {
