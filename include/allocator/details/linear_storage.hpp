@@ -1,6 +1,8 @@
 #ifndef LINEAR_STORAGE_HPP
 #define LINEAR_STORAGE_HPP
 
+#include <type_traits>
+
 namespace alloc_utility
 {
 
@@ -11,6 +13,9 @@ template <typename pointer, typename size_type>
 class linear_storage
 {
 public:
+
+    static_assert(std::is_same<typename std::pointer_traits<pointer>::element_type, std::uint8_t>::value,
+                  "Type of pointed value should be uint8_t");
 
     linear_storage() noexcept:
         m_storage(nullptr)
