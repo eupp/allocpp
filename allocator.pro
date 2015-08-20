@@ -47,7 +47,8 @@ HEADERS += \
     include/allocator/linear_allocation.hpp \
     include/allocator/details/linear_storage.hpp \
     include/allocator/pointer_concepts.hpp \
-    include/allocator/details/alloc_type_traits.hpp
+    include/allocator/details/alloc_type_traits.hpp \
+    include/allocator/details/is_swappable.hpp
 
 INCLUDEPATH += include/allocator
 

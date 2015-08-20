@@ -80,4 +80,25 @@ struct poorly_defined_policy: public base_policy
     }
 };
 
+namespace adl_check {
+
+struct swappable
+{
+    swappable(const swappable&) = delete;
+    swappable(swappable&&) = delete;
+};
+
+inline void swap(swappable&, swappable&)
+{
+    return;
+}
+
+struct not_swappable
+{
+    not_swappable(const not_swappable&) = delete;
+    not_swappable(not_swappable&&) = delete;
+};
+
+}
+
 #endif // TEST_TYPES_HPP

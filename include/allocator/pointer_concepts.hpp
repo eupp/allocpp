@@ -23,6 +23,7 @@ struct single_object_ptr_trait: public std::integral_constant<bool,
         && details::is_equality_comparable<T, std::nullptr_t>::value
         && details::is_contextual_convertible_to_bool<T>::value
         && details::has_dereference_operator<T>::value
+        && details::is_swappable<T, T>::value
         >
 {};
 

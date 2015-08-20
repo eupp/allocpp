@@ -2,6 +2,9 @@
 #define ALLOC_TYPE_TRAITS_HPP
 
 #include <type_traits>
+#include <memory>
+
+#include "is_swappable.hpp"
 
 namespace alloc_utility
 {
@@ -41,7 +44,10 @@ struct has_dereference_operator: public std::false_type
 {};
 
 template <typename T>
-struct has_dereference_operator<T, void_t<decltype(*std::declval<T>())>>: public std::true_type
+struct has_dereference_operator<T, void_t<decltype(*std::declval<T>())>>: public std::is_convertible<
+    decltype(*std::declval<T>()),
+    typename std::add_lvalue_reference<typename std::pointer_traits<T>::element_type>::type
+    >
 {};
 
 
@@ -115,6 +121,9 @@ struct is_contextual_convertible_to_bool<T, void_t<
         >
     >: public std::true_type
 {};
+
+template <typename T, typename U>
+using is_swappable = op::is_swappable<T, U>;
 
 /* *****************************************************************************************************
    enable_

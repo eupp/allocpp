@@ -48,6 +48,18 @@ TEST(alloc_type_traits_test, test_supports_inequality)
     EXPECT_FALSE(value2);
 }
 
+TEST(alloc_type_traits_test, test_is_swappable)
+{
+    bool value1 = is_swappable<int, int>::value;
+    EXPECT_TRUE(value1);
+
+    bool value2 = is_swappable<adl_check::swappable, adl_check::swappable>::value;
+    EXPECT_TRUE(value2);
+
+    bool value3 = is_swappable<adl_check::not_swappable, adl_check::not_swappable>::value;
+    EXPECT_FALSE(value3);
+}
+
 TEST(alloc_type_traits_test, test_enable_propagate)
 {
     EXPECT_TRUE(enable_propagate_on_copy<well_defined_policy<int>>::value);
