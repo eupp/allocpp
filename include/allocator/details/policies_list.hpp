@@ -38,17 +38,17 @@ namespace details
                                     >;
 
         typedef std::integral_constant<bool,
-                enable_propagate_on_copy<alloc_policy>::value
+                   enable_propagate_on_copy<alloc_policy>::value
                 || super_base::propagate_on_container_copy_assignment::value
             > propagate_on_container_copy_assignment;
 
         typedef std::integral_constant<bool,
-                enable_propagate_on_move<alloc_policy>::value
+                   enable_propagate_on_move<alloc_policy>::value
                 || super_base::propagate_on_container_move_assignment::value
             > propagate_on_container_move_assignment;
 
         typedef std::integral_constant<bool,
-                enable_propagate_on_move<alloc_policy>::value
+                   enable_propagate_on_move<alloc_policy>::value
                 || super_base::propagate_on_container_swap::value
             > propagate_on_container_swap;
 
@@ -73,28 +73,28 @@ namespace details
 
         template <typename policy>
         auto equal_to_helper(const policies_list& other) const
-            -> typename std::enable_if<has_equal_to_op<policy>::value, bool>::type
+            -> typename std::enable_if<details::supports_equality<policy, policy>::value, bool>::type
         {
             return base::operator==(other) && super_base::operator==(other);
         }
 
         template <typename policy>
         auto equal_to_helper(const policies_list& other) const
-            -> typename std::enable_if<!has_equal_to_op<policy>::value, bool>::type
+            -> typename std::enable_if<!details::supports_equality<policy, policy>::value, bool>::type
         {
             return super_base::operator==(other);
         }
 
         template <typename policy>
         auto not_equal_to_helper(const policies_list& other) const
-            -> typename std::enable_if<has_not_equal_to_op<policy>::value, bool>::type
+            -> typename std::enable_if<details::supports_inequality<policy, policy>::value, bool>::type
         {
             return base::operator!=(other) || super_base::operator!=(other);
         }
 
         template <typename policy>
         auto not_equal_to_helper(const policies_list& other) const
-            -> typename std::enable_if<!has_not_equal_to_op<policy>::value, bool>::type
+            -> typename std::enable_if<!details::supports_inequality<policy, policy>::value, bool>::type
         {
             return super_base::operator!=(other);
         }

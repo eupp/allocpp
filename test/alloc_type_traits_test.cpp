@@ -1,12 +1,13 @@
-#include <type_traits>
-
 #include <gtest/gtest.h>
+
+#include <memory>
 
 #include "test_types.hpp"
 
-#include "alloc_type_traits.hpp"
+#include "details/alloc_type_traits.hpp"
 
 using namespace alloc_utility;
+using namespace alloc_utility::details;
 
 TEST(alloc_type_traits_test, test_has_rebind)
 {
@@ -14,16 +15,37 @@ TEST(alloc_type_traits_test, test_has_rebind)
     EXPECT_FALSE(has_rebind<empty_class>::value);
 }
 
-TEST(alloc_type_traits_test, test_has_equal_to_op)
+TEST(alloc_type_traits_test, test_has_dereference_operator)
 {
-    EXPECT_TRUE(has_equal_to_op<class_with_comparison_ops>::value);
-    EXPECT_FALSE(has_equal_to_op<empty_class>::value);
+    EXPECT_TRUE(has_dereference_operator<int*>::value);
+    EXPECT_TRUE(has_dereference_operator<std::shared_ptr<int>>::value);
+    EXPECT_FALSE(has_dereference_operator<empty_class>::value);
+    EXPECT_FALSE(has_dereference_operator<int>::value);
 }
 
-TEST(alloc_type_traits_test, test_has_not_equal_to_op)
+TEST(alloc_type_traits_test, test_has_member_access_operator)
 {
-    EXPECT_TRUE(has_not_equal_to_op<class_with_comparison_ops>::value);
-    EXPECT_FALSE(has_not_equal_to_op<empty_class>::value);
+    EXPECT_TRUE(has_member_access_operator<std::shared_ptr<int>>::value);
+    EXPECT_FALSE(has_member_access_operator<empty_class>::value);
+    EXPECT_FALSE(has_member_access_operator<int>::value);
+}
+
+TEST(alloc_type_traits_test, test_supports_equality)
+{
+    bool value1 = supports_equality<class_with_comparison_ops, class_with_comparison_ops>::value;
+    EXPECT_TRUE(value1);
+
+    bool value2 = supports_equality<empty_class, empty_class>::value;
+    EXPECT_FALSE(value2);
+}
+
+TEST(alloc_type_traits_test, test_supports_inequality)
+{
+    bool value1 = supports_inequality<class_with_comparison_ops, class_with_comparison_ops>::value;
+    EXPECT_TRUE(value1);
+
+    bool value2 = supports_inequality<empty_class, empty_class>::value;
+    EXPECT_FALSE(value2);
 }
 
 TEST(alloc_type_traits_test, test_enable_propagate)

@@ -11,22 +11,6 @@ namespace alloc_utility
 namespace details
 {
 
-// helper struct for declaring inner template type rebind with template parameter U.
-// enable_rebind<X, U>::type will be alias to X::rebind<U> if X defines rebind,
-// otherwise it will be equal to just X
-
-template <typename X, typename U, typename Enable = void>
-struct enable_rebind
-{
-    typedef X type;
-};
-
-template <typename X, typename U>
-struct enable_rebind<X, U, typename std::enable_if<has_rebind<X>::value>::type>
-{
-    typedef typename X::template rebind<U> type;
-};
-
 // helper struct for replacng last type from variadic template list with rebind_type
 
 template <int N, template <typename...> class alloc, typename T, typename rebind_type, typename head_type, typename... types>
