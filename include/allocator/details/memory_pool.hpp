@@ -7,6 +7,7 @@
 #include <vector>
 #include <list>
 #include <memory>
+#include <new>
 #include <type_traits>
 #include <utility>
 
@@ -405,15 +406,24 @@ public:
 
     pool_type* get_pool(size_type obj_size)
     {
+        pool_type* pool = get_pool(obj_size, std::nothrow);
+        if (pool != nullptr) {
+            return pool;
+        }
+        pool_type new_pool(obj_size);
+        m_pools.emplace_back(std::move(new_pool), 1);
+        return &m_pools.back().first;
+    }
+
+    pool_type* get_pool(size_type obj_size, std::nothrow_t) noexcept
+    {
         for (auto& pool_with_rc: m_pools) {
             if (pool_with_rc.first.obj_size() == obj_size) {
                 ++pool_with_rc.second;
                 return &pool_with_rc.first;
             }
         }
-        pool_type new_pool(obj_size);
-        m_pools.emplace_back(std::move(new_pool), 1);
-        return &m_pools.back().first;
+        return nullptr;
     }
 
     void release_pool(size_type obj_size) noexcept

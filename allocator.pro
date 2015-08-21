@@ -14,7 +14,7 @@ SOURCES += \
     test/rebind_test.cpp \
     test/policies_list_test.cpp \
     test/linear_alloc_test.cpp \
-    test/pointer_concepts_test.cpp
+    test/concepts_test.cpp
 
 HEADERS += \
     allocator.hpp \
@@ -48,7 +48,10 @@ HEADERS += \
     include/allocator/details/linear_storage.hpp \
     include/allocator/pointer_concepts.hpp \
     include/allocator/details/alloc_type_traits.hpp \
-    include/allocator/details/is_swappable.hpp
+    include/allocator/details/is_swappable.hpp \
+    include/allocator/alloc_policy_concept.hpp \
+    include/allocator/concepts/alloc_policy_concept.hpp \
+    include/allocator/concepts/pointer_concepts.hpp
 
 INCLUDEPATH += include/allocator
 

@@ -53,6 +53,8 @@ namespace details
             > propagate_on_container_swap;
 
         policies_list() = default;
+        policies_list(const policies_list&) = default;
+        policies_list(policies_list&&) = default;
 
         template <typename U>
         policies_list(const rebind<U>& other):
@@ -109,12 +111,17 @@ namespace details
         using rebind = policies_list<typename alloc_traits::template rebind<U>>;
 
         policies_list() = default;
+        policies_list(const policies_list&) = default;
+        policies_list(const policies_list&&) = default;
 
         template <typename U>
         policies_list(const policies_list::rebind<U>& other)
         {
             ALLOC_UNUSED(other);
         }
+
+        policies_list& operator=(const policies_list&) = default;
+        policies_list& operator=(policies_list&&) = default;
 
         template <typename U>
         bool operator==(const policies_list::rebind<U>& other) const noexcept

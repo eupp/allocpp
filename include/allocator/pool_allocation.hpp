@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <list>
 #include <memory>
+#include <new>
 #include <utility>
 
 #include "alloc_traits.hpp"
@@ -40,10 +41,10 @@ public:
       , m_block_size(block_size)
     {}
 
-    pool_allocation_policy(const pool_allocation_policy& other):
+    pool_allocation_policy(const pool_allocation_policy& other) noexcept:
         base_policy(other)
       , m_manager(other.m_manager)
-      , m_pool(m_manager->get_pool(sizeof(T)))
+      , m_pool(m_manager->get_pool(sizeof(T), std::nothrow))
       , m_block_size(other.m_block_size)
     {}
 
@@ -78,15 +79,16 @@ public:
         }
     }
 
-    pool_allocation_policy& operator=(pool_allocation_policy other)
+    pool_allocation_policy& operator=(pool_allocation_policy other) noexcept
     {
         other.swap(*this);
         return *this;
     }
 
-    void swap(pool_allocation_policy& other)
+    void swap(pool_allocation_policy& other) noexcept
     {
         using std::swap;
+        swap(static_cast<base_policy&>(*this), static_cast<base_policy&>(other));
         swap(m_manager, other.m_manager);
         swap(m_pool, other.m_pool);
         swap(m_block_size, other.m_block_size);
@@ -175,7 +177,7 @@ private:
 
 template <typename T, typename alloc_traits, typename base_policy>
 void swap(pool_allocation_policy<T, alloc_traits, base_policy>& alloc1,
-          pool_allocation_policy<T, alloc_traits, base_policy>& alloc2)
+          pool_allocation_policy<T, alloc_traits, base_policy>& alloc2) noexcept
 {
     alloc1.swap(alloc2);
 }

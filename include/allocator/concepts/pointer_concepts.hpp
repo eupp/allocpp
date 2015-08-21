@@ -8,11 +8,11 @@
 namespace alloc_utility
 {
 
-namespace pointer_concepts
+namespace concepts
 {
 
 template <typename T>
-struct single_object_ptr_trait: public std::integral_constant<bool,
+struct is_single_object_ptr: public std::integral_constant<bool,
            std::is_default_constructible<T>::value
         && std::is_constructible<T, std::nullptr_t>::value
         && std::is_copy_constructible<T>::value
@@ -27,12 +27,9 @@ struct single_object_ptr_trait: public std::integral_constant<bool,
         >
 {};
 
+} // namespace concepts
 
 
-
-} // pointer_concepts
-
-
-} // alloc_utility
+} // namespace alloc_utility
 
 #endif // POINTER_CONCEPTS_HPP

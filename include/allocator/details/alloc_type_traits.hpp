@@ -125,6 +125,9 @@ struct is_contextual_convertible_to_bool<T, void_t<
 template <typename T, typename U>
 using is_swappable = op::is_swappable<T, U>;
 
+template <typename T, typename U>
+using is_nothrow_swappable = op::is_nothrow_swappable<T, U>;
+
 /* *****************************************************************************************************
    enable_
    ***************************************************************************************************** */
