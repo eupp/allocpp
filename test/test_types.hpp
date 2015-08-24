@@ -41,14 +41,17 @@ struct well_defined_policy: public base_policy
     well_defined_policy() = default;
     well_defined_policy(const well_defined_policy&) = default;
 
-    typedef std::true_type propagate_on_container_copy_assignment;
-    typedef std::true_type propagate_on_container_move_assignment;
-    typedef std::true_type propagate_on_container_swap;
-
     template <typename U>
     well_defined_policy(const rebind<U>& other):
         flag(other.flag)
     {}
+
+    well_defined_policy& operator=(const well_defined_policy&) = default;
+    well_defined_policy& operator=(well_defined_policy&&) = default;
+
+    typedef std::true_type propagate_on_container_copy_assignment;
+    typedef std::true_type propagate_on_container_move_assignment;
+    typedef std::true_type propagate_on_container_swap;
 
     bool operator==(const well_defined_policy& other) const noexcept
     {
@@ -63,6 +66,11 @@ struct well_defined_policy: public base_policy
     bool flag;
 };
 
+template <typename T, typename alloc_traits, typename base_policy>
+inline void swap(well_defined_policy<T, alloc_traits, base_policy>&,
+                 well_defined_policy<T, alloc_traits, base_policy>&) noexcept
+{}
+
 template <typename T, typename alloc_traits = alloc_utility::allocation_traits<T>,
           typename base_policy = alloc_utility::none_policy<T>>
 struct poorly_defined_policy: public base_policy
@@ -72,13 +80,20 @@ struct poorly_defined_policy: public base_policy
 
     poorly_defined_policy() = default;
     poorly_defined_policy(const poorly_defined_policy&) = default;
+    poorly_defined_policy(poorly_defined_policy&&) = default;
 
     template <typename U>
-    poorly_defined_policy(const rebind<U>& other)
-    {
-        ALLOC_UNUSED(other);
-    }
+    poorly_defined_policy(const rebind<U>& )
+    {}
+
+    poorly_defined_policy& operator=(const poorly_defined_policy&) = default;
+    poorly_defined_policy& operator=(poorly_defined_policy&&) = default;
 };
+
+template <typename T, typename alloc_traits, typename base_policy>
+inline void swap(poorly_defined_policy<T, alloc_traits, base_policy>&,
+                 poorly_defined_policy<T, alloc_traits, base_policy>&) noexcept
+{}
 
 namespace adl_check {
 

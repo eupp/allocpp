@@ -112,7 +112,7 @@ namespace details
 
         policies_list() = default;
         policies_list(const policies_list&) = default;
-        policies_list(const policies_list&&) = default;
+        policies_list(policies_list&&) = default;
 
         template <typename U>
         policies_list(const policies_list::rebind<U>& other)

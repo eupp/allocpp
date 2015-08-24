@@ -3,6 +3,7 @@
 
 #include <type_traits>
 #include <memory>
+#include <cstddef>
 
 #include "is_swappable.hpp"
 
@@ -25,6 +26,13 @@ struct placeholder
 {
     int member;
 };
+
+/* *****************************************************************************************************
+   pre-declarations
+   ***************************************************************************************************** */
+
+template <typename T, typename = void>
+struct enable_difference_type;
 
 /* *****************************************************************************************************
    has_
@@ -57,6 +65,21 @@ struct has_member_access_operator: public std::false_type
 
 template <typename T>
 struct has_member_access_operator<T, void_t<decltype(std::declval<T>().operator->())>>: public std::true_type
+{};
+
+
+template <typename T, typename = void>
+struct has_array_subscript_operator: public std::false_type
+{};
+
+template <typename T>
+struct has_array_subscript_operator<
+        T,
+        void_t<decltype(std::declval<T>()[std::declval<typename enable_difference_type<T>::type>()])>
+    >: public std::is_convertible<
+        decltype(std::declval<T>()[std::declval<typename enable_difference_type<T>::type>()]),
+        typename std::add_lvalue_reference<int>::type
+    >
 {};
 
 /* *****************************************************************************************************
@@ -128,6 +151,19 @@ using is_swappable = op::is_swappable<T, U>;
 template <typename T, typename U>
 using is_nothrow_swappable = op::is_nothrow_swappable<T, U>;
 
+template <typename T, typename = void>
+struct is_constructible_from_rebind: public std::false_type
+{};
+
+template <typename T>
+struct is_constructible_from_rebind<T, typename std::enable_if<has_rebind<T>::value>::type>:
+//        public std::true_type
+
+        public std::integral_constant<bool,
+        std::is_constructible<T, typename T::template rebind<details::placeholder>>::value
+        >
+{};
+
 /* *****************************************************************************************************
    enable_
    ***************************************************************************************************** */
@@ -146,6 +182,19 @@ template <typename X, typename U>
 struct enable_rebind<X, U, typename std::enable_if<has_rebind<X>::value>::type>
 {
     typedef typename X::template rebind<U> type;
+};
+
+
+template <typename T, typename>
+struct enable_difference_type
+{
+    typedef std::ptrdiff_t type;
+};
+
+template <typename T>
+struct enable_difference_type<T, void_t<typename T::difference_type>>
+{
+    typedef typename T::difference_type type;
 };
 
 

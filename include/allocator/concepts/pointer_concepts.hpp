@@ -12,20 +12,39 @@ namespace concepts
 {
 
 template <typename T>
-struct is_single_object_ptr: public std::integral_constant<bool,
+struct is_nullable_ptr: public std::integral_constant<bool,
            std::is_default_constructible<T>::value
-        && std::is_constructible<T, std::nullptr_t>::value
         && std::is_copy_constructible<T>::value
+        && std::is_nothrow_constructible<T, std::nullptr_t>::value
         && std::is_copy_assignable<T>::value
-        && std::is_assignable<T, std::nullptr_t>::value
         && std::is_destructible<T>::value
         && details::is_equality_comparable<T, T>::value
         && details::is_equality_comparable<T, std::nullptr_t>::value
         && details::is_contextual_convertible_to_bool<T>::value
-        && details::has_dereference_operator<T>::value
         && details::is_swappable<T, T>::value
         >
 {};
+
+template <typename T>
+struct is_single_object_ptr: public std::integral_constant<bool,
+           is_nullable_ptr<T>::value
+        && details::has_dereference_operator<T>::value
+        >
+{};
+
+template <typename T>
+struct is_array_ptr: public std::integral_constant<bool,
+           is_single_object_ptr<T>::value
+        && details::has_array_subscript_operator<T>::value
+        >
+{};
+
+//template <typename T>
+//struct is_random_access_ptr: public std::integral_constant<bool,
+//           is_array_ptr<T>::value
+//        &&
+//        >
+//{};
 
 } // namespace concepts
 

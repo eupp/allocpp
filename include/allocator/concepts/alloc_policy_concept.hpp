@@ -16,11 +16,11 @@ struct is_alloc_policy: public std::integral_constant<bool,
            std::is_default_constructible<T>::value
         && std::is_copy_constructible<T>::value
         && std::is_move_constructible<T>::value
-        && std::is_destructible::value
+        && details::is_constructible_from_rebind<T>::value
+        && std::is_destructible<T>::value
         && std::is_nothrow_copy_assignable<T>::value
         && std::is_nothrow_move_assignable<T>::value
         && details::is_nothrow_swappable<T, T>::value
-        && details::is_equality_comparable<T, T>::value
         >
 {};
 

@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <memory>
+#include <cstddef>
 
 #include "test_types.hpp"
 
@@ -28,6 +29,14 @@ TEST(alloc_type_traits_test, test_has_member_access_operator)
     EXPECT_TRUE(has_member_access_operator<std::shared_ptr<int>>::value);
     EXPECT_FALSE(has_member_access_operator<empty_class>::value);
     EXPECT_FALSE(has_member_access_operator<int>::value);
+}
+
+TEST(alloc_type_traits_test, test_has_array_subscript_operator)
+{
+    EXPECT_TRUE(has_array_subscript_operator<int*>::value);
+    EXPECT_TRUE(has_array_subscript_operator<std::unique_ptr<int[]>>::value);
+    EXPECT_FALSE(has_array_subscript_operator<empty_class>::value);
+    EXPECT_FALSE(has_array_subscript_operator<int>::value);
 }
 
 TEST(alloc_type_traits_test, test_supports_equality)
@@ -60,6 +69,13 @@ TEST(alloc_type_traits_test, test_is_swappable)
     EXPECT_FALSE(value3);
 }
 
+TEST(alloc_type_traits_test, test_is_constrictible_from_rebind)
+{
+    EXPECT_TRUE(is_constructible_from_rebind<well_defined_policy<int>>::value);
+    EXPECT_FALSE(is_constructible_from_rebind<class_with_rebind>::value);
+    EXPECT_FALSE(is_constructible_from_rebind<empty_class>::value);
+}
+
 TEST(alloc_type_traits_test, test_enable_propagate)
 {
     EXPECT_TRUE(enable_propagate_on_copy<well_defined_policy<int>>::value);
@@ -70,4 +86,19 @@ TEST(alloc_type_traits_test, test_enable_propagate)
 
     EXPECT_TRUE(enable_propagate_on_swap<well_defined_policy<int>>::value);
     EXPECT_FALSE(enable_propagate_on_swap<poorly_defined_policy<int>>::value);
+}
+
+TEST(alloc_type_traits_test, test_enable_difference_type)
+{
+    bool value1 = std::is_same<
+        typename std::pointer_traits<int*>::difference_type,
+        typename enable_difference_type<int*>::type
+        >::value;
+    EXPECT_TRUE(value1);
+
+    bool value2 = std::is_same<
+        std::ptrdiff_t,
+        typename enable_difference_type<int>::type
+        >::value;
+    EXPECT_TRUE(value2);
 }

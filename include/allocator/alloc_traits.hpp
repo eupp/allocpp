@@ -14,7 +14,6 @@ class allocation_traits
 {
 public:
 
-
     typedef T value_type;
 
     typedef typename std::add_pointer<T>::type pointer;
