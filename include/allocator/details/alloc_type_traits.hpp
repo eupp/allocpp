@@ -74,11 +74,70 @@ struct has_array_subscript_operator: public std::false_type
 
 template <typename T>
 struct has_array_subscript_operator<
-        T,
-        void_t<decltype(std::declval<T>()[std::declval<typename enable_difference_type<T>::type>()])>
+    T,
+    void_t<decltype(std::declval<T>()[std::declval<typename enable_difference_type<T>::type>()])>
     >: public std::is_convertible<
         decltype(std::declval<T>()[std::declval<typename enable_difference_type<T>::type>()]),
         typename std::add_lvalue_reference<int>::type
+        >
+{};
+
+
+template <typename T, typename = void>
+struct has_pre_increment_operator: public std::false_type
+{};
+
+template <typename T>
+struct has_pre_increment_operator<
+    T,
+    void_t<decltype(++std::declval<typename std::add_lvalue_reference<T>::type>())>
+    >: public std::is_convertible<
+        decltype(++std::declval<typename std::add_lvalue_reference<T>::type>()),
+        typename std::add_lvalue_reference<T>::type
+        >
+{};
+
+template <typename T, typename = void>
+struct has_pre_decrement_operator: public std::false_type
+{};
+
+template <typename T>
+struct has_pre_decrement_operator<
+    T,
+    void_t<decltype(--std::declval<typename std::add_lvalue_reference<T>::type>())>
+    >: public std::is_convertible<
+        decltype(--std::declval<typename std::add_lvalue_reference<T>::type>()),
+        typename std::add_lvalue_reference<T>::type
+        >
+{};
+
+
+template <typename T, typename = void>
+struct has_post_increment_operator: public std::false_type
+{};
+
+template <typename T>
+struct has_post_increment_operator<
+    T,
+    void_t<decltype(std::declval<typename std::add_lvalue_reference<T>::type>()++)>
+    >: public std::is_convertible<
+        decltype(std::declval<typename std::add_lvalue_reference<T>::type>()++),
+        typename std::add_lvalue_reference<typename std::add_const<T>::type>::type
+    >
+{};
+
+
+template <typename T, typename = void>
+struct has_post_decrement_operator: public std::false_type
+{};
+
+template <typename T>
+struct has_post_decrement_operator<
+    T,
+    void_t<decltype(std::declval<typename std::add_lvalue_reference<T>::type>()--)>
+    >: public std::is_convertible<
+        decltype(std::declval<typename std::add_lvalue_reference<T>::type>()--),
+        typename std::add_lvalue_reference<typename std::add_const<T>::type>::type
     >
 {};
 
@@ -92,12 +151,12 @@ struct supports_equality: public std::false_type
 
 template <typename T, typename U>
 struct supports_equality<
-        T,
-        U,
-        details::void_t<
-            decltype(std::declval<T>() == std::declval<U>()),
-            decltype(std::declval<U>() == std::declval<T>())
-            >
+    T,
+    U,
+    details::void_t<
+        decltype(std::declval<T>() == std::declval<U>()),
+        decltype(std::declval<U>() == std::declval<T>())
+        >
     >: public std::integral_constant<bool,
                std::is_same<bool, decltype(std::declval<T>() == std::declval<U>())>::value
             && std::is_same<bool, decltype(std::declval<U>() == std::declval<T>())>::value

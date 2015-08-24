@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <cstddef>
+#include <vector>
 
 #include "test_types.hpp"
 
@@ -9,6 +10,8 @@
 
 using namespace alloc_utility;
 using namespace alloc_utility::details;
+
+typedef typename std::vector<int>::iterator iterator_type;
 
 TEST(alloc_type_traits_test, test_has_rebind)
 {
@@ -37,6 +40,34 @@ TEST(alloc_type_traits_test, test_has_array_subscript_operator)
     EXPECT_TRUE(has_array_subscript_operator<std::unique_ptr<int[]>>::value);
     EXPECT_FALSE(has_array_subscript_operator<empty_class>::value);
     EXPECT_FALSE(has_array_subscript_operator<int>::value);
+}
+
+TEST(alloc_type_traits_test, test_has_pre_increment_operator)
+{
+    EXPECT_TRUE(has_pre_increment_operator<int*>::value);
+    EXPECT_TRUE(has_pre_increment_operator<iterator_type>::value);
+    EXPECT_FALSE(has_pre_increment_operator<empty_class>::value);
+}
+
+TEST(alloc_type_traits_test, test_has_pre_decrement_operator)
+{
+    EXPECT_TRUE(has_pre_decrement_operator<int*>::value);
+    EXPECT_TRUE(has_pre_decrement_operator<iterator_type>::value);
+    EXPECT_FALSE(has_pre_decrement_operator<empty_class>::value);
+}
+
+TEST(alloc_type_traits_test, test_has_post_increment_operator)
+{
+    EXPECT_TRUE(has_post_increment_operator<int*>::value);
+    EXPECT_TRUE(has_post_increment_operator<iterator_type>::value);
+    EXPECT_FALSE(has_post_increment_operator<empty_class>::value);
+}
+
+TEST(alloc_type_traits_test, test_has_post_decrement_operator)
+{
+    EXPECT_TRUE(has_post_decrement_operator<int*>::value);
+    EXPECT_TRUE(has_post_decrement_operator<iterator_type>::value);
+    EXPECT_FALSE(has_post_decrement_operator<empty_class>::value);
 }
 
 TEST(alloc_type_traits_test, test_supports_equality)
