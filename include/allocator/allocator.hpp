@@ -34,6 +34,27 @@ public:
                          > other;
     };
 
+    typedef typename base::propagate_on_container_copy_assignment propagate_on_container_copy_assignment;
+    typedef typename base::propagate_on_container_move_assignment propagate_on_container_move_assignment;
+    typedef typename base::propagate_on_container_swap propagate_on_container_swap;
+
+    allocator() = default;
+    allocator(const allocator& other) = default;
+    allocator(allocator&& other) = default;
+
+    template <typename U>
+    allocator(const rebind<U>& other):
+        base(other)
+    {}
+
+    allocator& operator=(const allocator& other) = default;
+    allocator& operator=(allocator&&) = default;
+
+    void swap(allocator& other) noexcept
+    {
+        base::swap(other);
+    }
+
     pointer address(reference ref) const noexcept
     {
         return alloc_traits::address(ref);
@@ -71,6 +92,13 @@ public:
         alloc_traits::destroy(ptr);
     }
 };
+
+template <typename T, typename alloc_traits, typename... alloc_policies>
+void swap(allocator<T, alloc_traits, alloc_policies...>& alloc1,
+          allocator<T, alloc_traits, alloc_policies...>& alloc2) noexcept
+{
+    alloc1.swap(alloc2);
+}
 
 } // namespace alloc_utility
 

@@ -38,6 +38,10 @@ struct well_defined_policy: public base_policy
     DECLARE_ALLOC_TRAITS(T, alloc_traits)
     DECLARE_REBIND_ALLOC(well_defined_policy, T, alloc_traits, base_policy)
 
+    typedef std::true_type propagate_on_container_copy_assignment;
+    typedef std::true_type propagate_on_container_move_assignment;
+    typedef std::true_type propagate_on_container_swap;
+
     well_defined_policy() = default;
     well_defined_policy(const well_defined_policy&) = default;
 
@@ -48,10 +52,6 @@ struct well_defined_policy: public base_policy
 
     well_defined_policy& operator=(const well_defined_policy&) = default;
     well_defined_policy& operator=(well_defined_policy&&) = default;
-
-    typedef std::true_type propagate_on_container_copy_assignment;
-    typedef std::true_type propagate_on_container_move_assignment;
-    typedef std::true_type propagate_on_container_swap;
 
     bool operator==(const well_defined_policy& other) const noexcept
     {

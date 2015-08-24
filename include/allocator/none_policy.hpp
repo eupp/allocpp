@@ -23,12 +23,18 @@ public:
     typedef std::false_type propagate_on_container_swap;
 
     none_policy() = default;
+    none_policy(const none_policy& other) = default;
+    none_policy(none_policy&&) = default;
 
     template <typename U>
-    none_policy(const none_policy::rebind<U>& other)
-    {
-        ALLOC_UNUSED(other);
-    }
+    none_policy(const none_policy::rebind<U>&)
+    {}
+
+    none_policy& operator=(const none_policy&) = default;
+    none_policy& operator=(none_policy&&) = default;
+
+    void swap(none_policy&) noexcept
+    {}
 
     pointer allocate(size_type n, const pointer& ptr, const_void_pointer hint = nullptr) noexcept
     {

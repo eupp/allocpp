@@ -2,6 +2,7 @@
 #define POLICIES_LIST_HPP
 
 #include <type_traits>
+#include <utility>
 
 #include "none_policy.hpp"
 #include "alloc_type_traits.hpp"
@@ -61,6 +62,21 @@ namespace details
             base(other)
         {}
 
+        policies_list& operator=(const policies_list& other) noexcept
+        {
+            return base::operator=(other);
+        }
+
+        policies_list& operator=(policies_list&& other) noexcept
+        {
+            return base::operator=(std::move(other));
+        }
+
+        void swap(policies_list& other) noexcept
+        {
+            base::swap(other);
+        }
+
         bool operator==(const policies_list& other) const
         {
             return equal_to_helper<alloc_policy>(other);
@@ -115,18 +131,18 @@ namespace details
         policies_list(policies_list&&) = default;
 
         template <typename U>
-        policies_list(const policies_list::rebind<U>& other)
-        {
-            ALLOC_UNUSED(other);
-        }
+        policies_list(const policies_list::rebind<U>&)
+        {}
 
         policies_list& operator=(const policies_list&) = default;
         policies_list& operator=(policies_list&&) = default;
 
+        void swap(policies_list&) noexcept
+        {}
+
         template <typename U>
-        bool operator==(const policies_list::rebind<U>& other) const noexcept
+        bool operator==(const policies_list::rebind<U>&) const noexcept
         {
-            ALLOC_UNUSED(other);
             return true;
         }
 
