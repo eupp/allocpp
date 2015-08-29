@@ -91,6 +91,16 @@ public:
     {
         alloc_traits::destroy(ptr);
     }
+
+    bool operator==(const allocator& other) const noexcept
+    {
+        return base::operator==(other);
+    }
+
+    bool operator!=(const allocator& other) const noexcept
+    {
+        return base::operator!=(other);
+    }
 };
 
 template <typename T, typename alloc_traits, typename... alloc_policies>
@@ -98,6 +108,20 @@ void swap(allocator<T, alloc_traits, alloc_policies...>& alloc1,
           allocator<T, alloc_traits, alloc_policies...>& alloc2) noexcept
 {
     alloc1.swap(alloc2);
+}
+
+template <typename T, typename alloc_traits, typename... alloc_policies>
+bool operator==(const allocator<T, alloc_traits, alloc_policies...>& alloc1,
+                const allocator<T, alloc_traits, alloc_policies...>& alloc2) noexcept
+{
+    return alloc1.operator==(alloc2);
+}
+
+template <typename T, typename alloc_traits, typename... alloc_policies>
+bool operator!=(const allocator<T, alloc_traits, alloc_policies...>& alloc1,
+                const allocator<T, alloc_traits, alloc_policies...>& alloc2) noexcept
+{
+    return alloc1.operator!=(alloc2);
 }
 
 } // namespace alloc_utility
