@@ -31,6 +31,14 @@ struct class_with_comparison_ops
     }
 };
 
+struct class_with_arithmetick
+{};
+
+inline empty_class operator+(const class_with_arithmetick&, const class_with_arithmetick&)
+{
+    return empty_class();
+}
+
 template <typename T, typename alloc_traits = alloc_utility::allocation_traits<T>,
           typename base_policy = alloc_utility::none_policy<T>>
 struct well_defined_policy: public base_policy

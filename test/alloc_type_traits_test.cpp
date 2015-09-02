@@ -88,6 +88,21 @@ TEST(alloc_type_traits_test, test_supports_inequality)
     EXPECT_FALSE(value2);
 }
 
+TEST(alloc_type_traits_test, test_supports_addition)
+{
+    bool value1 = supports_addition<int, int, int>::value;
+    EXPECT_TRUE(value1);
+
+    bool value2 = supports_addition<empty_class, class_with_arithmetick, class_with_arithmetick>::value;
+    EXPECT_TRUE(value2);
+
+    bool value3 = supports_addition<empty_class, empty_class, empty_class>::value;
+    EXPECT_FALSE(value3);
+
+    bool value4 = supports_addition<int, int, double>::value;
+    EXPECT_FALSE(value4);
+}
+
 TEST(alloc_type_traits_test, test_is_swappable)
 {
     bool value1 = is_swappable<int, int>::value;

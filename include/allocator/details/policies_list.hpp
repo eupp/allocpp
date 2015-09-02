@@ -64,12 +64,14 @@ namespace details
 
         policies_list& operator=(const policies_list& other) noexcept
         {
-            return base::operator=(other);
+            base::operator=(other);
+            return *this;
         }
 
         policies_list& operator=(policies_list&& other) noexcept
         {
-            return base::operator=(std::move(other));
+            base::operator=(std::move(other));
+            return *this;
         }
 
         void swap(policies_list& other) noexcept

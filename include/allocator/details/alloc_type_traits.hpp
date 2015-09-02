@@ -153,7 +153,7 @@ template <typename T, typename U>
 struct supports_equality<
     T,
     U,
-    details::void_t<
+    void_t<
         decltype(std::declval<T>() == std::declval<U>()),
         decltype(std::declval<U>() == std::declval<T>())
         >
@@ -181,6 +181,23 @@ struct supports_inequality<
             && std::is_same<bool, decltype(std::declval<U>() != std::declval<T>())>::value
             >
 {};
+
+
+template <typename Res, typename lOp, typename rOp, typename = void>
+struct supports_addition: public std::false_type
+{};
+
+template <typename Res, typename lOp, typename rOp>
+struct supports_addition<
+        Res, lOp, rOp, void_t<
+            decltype(std::declval<lOp>() + std::declval<rOp>())
+            >
+        >: public std::is_same<
+                  Res,
+                  decltype(std::declval<lOp>() + std::declval<rOp>())
+                  >
+{};
+
 
 /* *****************************************************************************************************
    is_
