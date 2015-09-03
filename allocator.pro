@@ -14,7 +14,11 @@ SOURCES += \
     test/rebind_test.cpp \
     test/policies_list_test.cpp \
     test/linear_alloc_test.cpp \
-    test/concepts_test.cpp
+    test/concepts_test.cpp \
+    test/details/alloc_type_traits_test.cpp \
+    test/details/policies_list_test.cpp \
+    test/details/rebind_test.cpp \
+    test/concepts/concepts_test.cpp
 
 HEADERS += \
     allocator.hpp \
