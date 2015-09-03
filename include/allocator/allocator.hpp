@@ -25,13 +25,16 @@ public:
     DECLARE_ALLOC_TRAITS(T, alloc_traits)
 
     template <typename U>
+    using rebind_t = allocator<
+                                U,
+                                typename alloc_traits::template rebind<U>,
+                                typename alloc_policies::template rebind<U>...
+                              >;
+
+    template <typename U>
     struct rebind
     {
-        typedef allocator<
-                          U,
-                          typename alloc_traits::template rebind<U>,
-                          typename alloc_policies::template rebind<U>...
-                         > other;
+        typedef rebind_t<U> other;
     };
 
     typedef typename base::propagate_on_container_copy_assignment propagate_on_container_copy_assignment;
@@ -43,9 +46,14 @@ public:
     allocator(allocator&& other) = default;
 
     template <typename U>
-    allocator(const rebind<U>& other):
+    allocator(const rebind_t<U>& other):
         base(other)
     {}
+
+    allocator select_on_container_copy_construction() const
+    {
+        return allocator(*this);
+    }
 
     allocator& operator=(const allocator& other) = default;
     allocator& operator=(allocator&&) = default;

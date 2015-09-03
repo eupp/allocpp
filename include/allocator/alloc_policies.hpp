@@ -119,6 +119,9 @@ public:
         m_log = log;
     }
 
+    template <typename, typename, typename>
+    friend class logging_policy;
+
 private:
     std::ostream* m_log;
 };

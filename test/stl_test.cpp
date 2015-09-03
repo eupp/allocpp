@@ -35,9 +35,9 @@ public:
     typedef std::uint8_t byte;
 
     typedef allocator<byte, allocation_traits<byte>,
-                        statistic_policy<byte>,
                         pool_allocation_policy<byte>,
                         default_allocation_policy<byte>,
+                        statistic_policy<byte>,
                         logging_policy<byte>
                      > test_allocator;
 
@@ -83,8 +83,9 @@ TEST_F(stl_test, test_vector_construct)
     test_vector vec1(alloc);
     EXPECT_EQ(alloc, vec1.get_allocator());
 
-    test_vector vec2(2048, 0, alloc);
+    test_vector vec2(CONT_SIZE, 0, alloc);
     EXPECT_EQ(alloc, vec2.get_allocator());
+    EXPECT_LE(CONT_SIZE * ELEM_SIZE, stat.mem_used());
 
     test_vector vec3(vec1);
     EXPECT_EQ(alloc, vec3.get_allocator());
@@ -162,4 +163,28 @@ TEST_F(stl_test, test_vector_clear)
     vec.resize(CONT_SIZE);
     vec.clear();
     EXPECT_LE((size_t) CONT_SIZE, stat.mem_used());
+}
+
+TEST_F(stl_test, test_list_construct)
+{
+    test_list lst1(alloc);
+    EXPECT_EQ(alloc, lst1.get_allocator());
+
+    test_list lst2(1, 0, alloc);
+    EXPECT_EQ(alloc, lst2.get_allocator());
+    EXPECT_LE((size_t)ELEM_SIZE, stat.mem_used());
+
+    test_list lst3(lst1);
+    EXPECT_EQ(alloc, lst3.get_allocator());
+
+    test_list lst4(std::move(lst3));
+    EXPECT_EQ(alloc, lst4.get_allocator());
+}
+
+TEST_F(stl_test, test_list_resize)
+{
+    test_list lst(alloc);
+    lst.resize(CONT_SIZE);
+    EXPECT_LE(CONT_SIZE * ELEM_SIZE, stat.mem_used());
+    EXPECT_TRUE(check_container(lst, 0));
 }
