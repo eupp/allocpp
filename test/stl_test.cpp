@@ -51,6 +51,7 @@ public:
     typedef std::list<byte, test_allocator> test_list;
 
     typedef std::vector<element, test_allocator_e> test_vector_e;
+    typedef std::list<element, test_allocator_e> test_list_e;
 
     static const int CONT_SIZE = 100;
     static const int ELEM_SIZE = sizeof(byte);
@@ -122,7 +123,7 @@ TEST_F(stl_test, test_vector_shrink)
 TEST_F(stl_test, test_vector_assign)
 {
     test_vector vec(alloc);
-    vec.reserve(1);
+    vec.resize(1);
     vec.assign(CONT_SIZE, 0);
     EXPECT_LE(CONT_SIZE * ELEM_SIZE, stat.mem_used());
     EXPECT_TRUE(check_container(vec, 0));
@@ -162,7 +163,6 @@ TEST_F(stl_test, test_vector_clear)
     test_vector vec(alloc);
     vec.resize(CONT_SIZE);
     vec.clear();
-    EXPECT_LE((size_t) CONT_SIZE, stat.mem_used());
 }
 
 TEST_F(stl_test, test_list_construct)
@@ -187,4 +187,64 @@ TEST_F(stl_test, test_list_resize)
     lst.resize(CONT_SIZE);
     EXPECT_LE(CONT_SIZE * ELEM_SIZE, stat.mem_used());
     EXPECT_TRUE(check_container(lst, 0));
+}
+
+TEST_F(stl_test, test_list_assign)
+{
+    test_list lst(alloc);
+    lst.resize(1);
+    lst.assign(CONT_SIZE, 0);
+    EXPECT_LE(CONT_SIZE * ELEM_SIZE, stat.mem_used());
+    EXPECT_TRUE(check_container(lst, 0));
+}
+
+TEST_F(stl_test, test_list_insert)
+{
+    test_list lst(alloc);
+    lst.resize(CONT_SIZE);
+    lst.insert(++lst.begin(), CONT_SIZE, 0);
+    EXPECT_LE(2 * CONT_SIZE * ELEM_SIZE, stat.mem_used());
+    EXPECT_TRUE(check_container(lst, 0));
+}
+
+TEST_F(stl_test, test_list_push)
+{
+    test_list lst(alloc);
+    for (int i = 0; i < CONT_SIZE; ++i) {
+        lst.push_front(0);
+        lst.push_back(0);
+    }
+    EXPECT_LE(2 * CONT_SIZE * ELEM_SIZE, stat.mem_used());
+    EXPECT_TRUE(check_container(lst, 0));
+}
+
+TEST_F(stl_test, test_list_emplace)
+{
+    test_list_e lst(alloc_e);
+    for (int i = 0; i < CONT_SIZE; ++i) {
+        lst.emplace_front(0);
+        lst.emplace_back(0);
+    }
+    EXPECT_LE(2 * CONT_SIZE * ELEM_SIZE, stat.mem_used());
+    EXPECT_TRUE(check_container(lst, element(0)));
+
+    lst.emplace(++lst.begin(), 0);
+    EXPECT_LE((2 * CONT_SIZE + 1) * ELEM_SIZE, stat.mem_used());
+    EXPECT_TRUE(check_container(lst, element(0)));
+}
+
+TEST_F(stl_test, test_list_erase)
+{
+    test_list lst(alloc);
+    lst.resize(CONT_SIZE);
+    lst.erase(lst.begin(), ++lst.begin());
+    EXPECT_LE(CONT_SIZE - 1, stat.mem_used());
+    EXPECT_TRUE(check_container(lst, 0));
+}
+
+TEST_F(stl_test, test_list_clear)
+{
+    test_list lst(alloc);
+    lst.resize(CONT_SIZE);
+    lst.clear();
 }
