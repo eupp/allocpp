@@ -199,6 +199,21 @@ struct supports_addition<
 {};
 
 
+template <typename Res, typename lOp, typename rOp, typename = void>
+struct supports_substraction: public std::false_type
+{};
+
+template <typename Res, typename lOp, typename rOp>
+struct supports_substraction<
+        Res, lOp, rOp, void_t<
+            decltype(std::declval<lOp>() - std::declval<rOp>())
+            >
+        >: public std::is_same<
+                  Res,
+                  decltype(std::declval<lOp>() - std::declval<rOp>())
+                  >
+{};
+
 /* *****************************************************************************************************
    is_
    ***************************************************************************************************** */

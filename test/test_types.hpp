@@ -31,10 +31,15 @@ struct class_with_comparison_ops
     }
 };
 
-struct class_with_arithmetick
+struct class_with_arithmetic
 {};
 
-inline empty_class operator+(const class_with_arithmetick&, const class_with_arithmetick&)
+inline empty_class operator+(const class_with_arithmetic&, const class_with_arithmetic&)
+{
+    return empty_class();
+}
+
+inline empty_class operator-(const class_with_arithmetic&, const class_with_arithmetic&)
 {
     return empty_class();
 }
