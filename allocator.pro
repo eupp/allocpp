@@ -10,11 +10,7 @@ SOURCES += \
     test/pool_test.cpp \
     test/statistic_policy_test.cpp \
     test/stl_test.cpp \
-    test/alloc_type_traits_test.cpp \
-    test/rebind_test.cpp \
-    test/policies_list_test.cpp \
     test/linear_alloc_test.cpp \
-    test/concepts_test.cpp \
     test/details/alloc_type_traits_test.cpp \
     test/details/policies_list_test.cpp \
     test/details/rebind_test.cpp \

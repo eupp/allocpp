@@ -25,8 +25,6 @@ class chunk
 {
 public:
 
-    typedef typename std::pointer_traits<pointer>::template rebind<std::uint8_t> byte_pointer;
-
     static_assert(std::is_same<typename std::pointer_traits<pointer>::element_type, std::uint8_t>::value,
                   "Type of pointed value should be uint8_t");
 
