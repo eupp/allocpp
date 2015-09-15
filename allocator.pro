@@ -17,20 +17,6 @@ SOURCES += \
     test/concepts/concepts_test.cpp
 
 HEADERS += \
-    allocator.hpp \
-    alloc_policies.hpp \
-    alloc_traits.hpp \
-    pointer_cast.hpp \
-    pool_allocation.hpp \
-    allocator/allocator.hpp \
-    allocator/alloc_policies.hpp \
-    allocator/alloc_traits.hpp \
-    allocator/pointer_cast.hpp \
-    allocator/pool_allocation.hpp \
-    allocator/macro.hpp \
-    allocator/statistic_policy.hpp \
-    allocator/none_policy.hpp \
-    allocator/details/memory_pool.hpp \
     include/allocator/allocator.hpp \
     include/allocator/alloc_policies.hpp \
     include/allocator/alloc_traits.hpp \
@@ -43,7 +29,6 @@ HEADERS += \
     include/allocator/details/policies_list.hpp \
     include/allocator/alloc_type_traits.hpp \
     include/allocator/details/rebind.hpp \
-    test/test_types.hpp \
     include/allocator/linear_allocation.hpp \
     include/allocator/details/linear_storage.hpp \
     include/allocator/pointer_concepts.hpp \
@@ -51,9 +36,10 @@ HEADERS += \
     include/allocator/details/is_swappable.hpp \
     include/allocator/alloc_policy_concept.hpp \
     include/allocator/concepts/alloc_policy_concept.hpp \
-    include/allocator/concepts/pointer_concepts.hpp
+    include/allocator/concepts/pointer_concepts.hpp \
+    test/test_types.hpp
 
-INCLUDEPATH += include/allocator
+INCLUDEPATH += include/allocator test
 
 LIBS += -lgtest -lgtest_main -pthread
 

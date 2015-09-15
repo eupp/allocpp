@@ -1,6 +1,7 @@
 #ifndef POINTER_CONCEPTS_HPP
 #define POINTER_CONCEPTS_HPP
 
+#include <memory>
 #include <type_traits>
 
 #include "details/alloc_type_traits.hpp"
@@ -39,12 +40,24 @@ struct is_array_ptr: public std::integral_constant<bool,
         >
 {};
 
-//template <typename T>
-//struct is_random_access_ptr: public std::integral_constant<bool,
-//           is_array_ptr<T>::value
-//        &&
-//        >
-//{};
+template <typename T>
+struct is_random_access_ptr: public std::integral_constant<bool,
+           is_array_ptr<T>::value
+
+        && details::has_pre_increment_operator<T>::value
+        && details::has_pre_decrement_operator<T>::value
+        && details::has_post_increment_operator<T>::value
+        && details::has_post_decrement_operator<T>::value
+
+        && details::supports_addition<T, typename details::enable_difference_type<T>::type, T>::value
+        && details::supports_addition<T, T, typename details::enable_difference_type<T>::type>::value
+
+        && details::supports_substraction<T, typename details::enable_difference_type<T>::type, T>::value
+        && details::supports_substraction<T, typename details::enable_difference_type<T>::type, T>::value
+
+
+        >
+{};
 
 } // namespace concepts
 

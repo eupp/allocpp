@@ -32,7 +32,19 @@ struct class_with_comparison_ops
 };
 
 struct class_with_arithmetic
-{};
+{
+public:
+
+    class_with_arithmetic& operator+=(const empty_class&)
+    {
+        return *this;
+    }
+
+    class_with_arithmetic& operator-=(const empty_class&)
+    {
+        return *this;
+    }
+};
 
 inline empty_class operator+(const class_with_arithmetic&, const class_with_arithmetic&)
 {

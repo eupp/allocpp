@@ -214,6 +214,38 @@ struct supports_substraction<
                   >
 {};
 
+
+template <typename lT, typename rT, typename = void>
+struct supports_add_assign: public std::false_type
+{};
+
+template <typename lT, typename rT>
+struct supports_add_assign<
+        lT, rT, void_t<
+            decltype(std::declval<typename std::add_lvalue_reference<lT>::type>() += std::declval<rT>())
+            >
+        >: public std::is_convertible<
+                decltype(std::declval<typename std::add_lvalue_reference<lT>::type>() += std::declval<rT>()),
+                typename std::add_lvalue_reference<lT>::type
+        >
+{};
+
+
+template <typename lT, typename rT, typename = void>
+struct supports_sub_assign: public std::false_type
+{};
+
+template <typename lT, typename rT>
+struct supports_sub_assign<
+        lT, rT, void_t<
+            decltype(std::declval<typename std::add_lvalue_reference<lT>::type>() -= std::declval<rT>())
+            >
+        >: public std::is_convertible<
+                decltype(std::declval<typename std::add_lvalue_reference<lT>::type>() -= std::declval<rT>()),
+                typename std::add_lvalue_reference<lT>::type
+        >
+{};
+
 /* *****************************************************************************************************
    is_
    ***************************************************************************************************** */

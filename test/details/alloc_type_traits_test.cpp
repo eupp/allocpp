@@ -118,6 +118,30 @@ TEST(alloc_type_traits_test, test_supports_substraction)
     EXPECT_FALSE(value4);
 }
 
+TEST(alloc_type_traits_test, test_supports_add_assign)
+{
+    bool value1 = supports_add_assign<int, int>::value;
+    EXPECT_TRUE(value1);
+
+    bool value2 = supports_add_assign<class_with_arithmetic, empty_class>::value;
+    EXPECT_TRUE(value2);
+
+    bool value3 = supports_add_assign<empty_class, empty_class>::value;
+    EXPECT_FALSE(value3);
+}
+
+TEST(alloc_type_traits_test, test_supports_sub_assign)
+{
+    bool value1 = supports_sub_assign<int, int>::value;
+    EXPECT_TRUE(value1);
+
+    bool value2 = supports_sub_assign<class_with_arithmetic, empty_class>::value;
+    EXPECT_TRUE(value2);
+
+    bool value3 = supports_sub_assign<empty_class, empty_class>::value;
+    EXPECT_FALSE(value3);
+}
+
 TEST(alloc_type_traits_test, test_is_swappable)
 {
     bool value1 = is_swappable<int, int>::value;
