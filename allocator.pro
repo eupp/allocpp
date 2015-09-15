@@ -57,3 +57,7 @@ INCLUDEPATH += include/allocator
 
 LIBS += -lgtest -lgtest_main -pthread
 
+OTHER_FILES += \
+    CMakeLists.txt \
+    test/CMakeLists.txt
+
