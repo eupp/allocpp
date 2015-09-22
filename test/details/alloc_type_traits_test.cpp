@@ -142,6 +142,36 @@ TEST(alloc_type_traits_test, test_supports_sub_assign)
     EXPECT_FALSE(value3);
 }
 
+TEST(alloc_type_traits_test, test_is_less_than_comparable)
+{
+    bool value1 = is_less_than_comparable<int, int>::value;
+    EXPECT_TRUE(value1);
+
+    bool value2 = is_less_than_comparable<int*, int*>::value;
+    EXPECT_TRUE(value2);
+
+    bool value3 = is_less_than_comparable<class_with_comparison_ops, class_with_comparison_ops>::value;
+    EXPECT_TRUE(value3);
+
+    bool value4 = is_less_than_comparable<empty_class, empty_class>::value;
+    EXPECT_FALSE(value4);
+}
+
+TEST(alloc_type_traits_test, test_is_less_equal_comparable)
+{
+    bool value1 = is_less_equal_comparable<int, int>::value;
+    EXPECT_TRUE(value1);
+
+    bool value2 = is_less_equal_comparable<int*, int*>::value;
+    EXPECT_TRUE(value2);
+
+    bool value3 = is_less_equal_comparable<class_with_comparison_ops, class_with_comparison_ops>::value;
+    EXPECT_TRUE(value3);
+
+    bool value4 = is_less_equal_comparable<empty_class, empty_class>::value;
+    EXPECT_FALSE(value4);
+}
+
 TEST(alloc_type_traits_test, test_is_swappable)
 {
     bool value1 = is_swappable<int, int>::value;

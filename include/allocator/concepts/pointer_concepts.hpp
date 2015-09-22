@@ -52,10 +52,16 @@ struct is_random_access_ptr: public std::integral_constant<bool,
         && details::supports_addition<T, typename details::enable_difference_type<T>::type, T>::value
         && details::supports_addition<T, T, typename details::enable_difference_type<T>::type>::value
 
-        && details::supports_substraction<T, typename details::enable_difference_type<T>::type, T>::value
-        && details::supports_substraction<T, typename details::enable_difference_type<T>::type, T>::value
+        && details::supports_substraction<T, T, typename details::enable_difference_type<T>::type>::value
+        && details::supports_substraction<typename details::enable_difference_type<T>::type, T, T>::value
 
+        && details::supports_add_assign<T, typename details::enable_difference_type<T>::type>::value
+        && details::supports_sub_assign<T, typename details::enable_difference_type<T>::type>::value
 
+        && details::is_less_than_comparable<T, T>::value
+        && details::is_greater_than_comparable<T, T>::value
+        && details::is_less_equal_comparable<T, T>::value
+        && details::is_greater_equal_comparable<T, T>::value
         >
 {};
 

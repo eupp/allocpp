@@ -29,3 +29,9 @@ TEST(concepts_test, test_is_array_ptr)
     EXPECT_TRUE(is_array_ptr<int*>::value);
     EXPECT_FALSE(is_array_ptr<std::shared_ptr<int>>::value);
 }
+
+TEST(concepts_test, test_is_random_access_ptr)
+{
+    EXPECT_TRUE(is_random_access_ptr<int*>::value);
+    // EXPECT_FALSE()
+}

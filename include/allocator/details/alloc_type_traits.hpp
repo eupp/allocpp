@@ -34,6 +34,9 @@ struct placeholder
 template <typename T, typename = void>
 struct enable_difference_type;
 
+template <typename T, typename = void>
+struct is_contextual_convertible_to_bool;
+
 /* *****************************************************************************************************
    has_
    ***************************************************************************************************** */
@@ -158,8 +161,8 @@ struct supports_equality<
         decltype(std::declval<U>() == std::declval<T>())
         >
     >: public std::integral_constant<bool,
-               std::is_same<bool, decltype(std::declval<T>() == std::declval<U>())>::value
-            && std::is_same<bool, decltype(std::declval<U>() == std::declval<T>())>::value
+               is_contextual_convertible_to_bool<decltype(std::declval<T>() == std::declval<U>())>::value
+            && is_contextual_convertible_to_bool<decltype(std::declval<U>() == std::declval<T>())>::value
             >
 {};
 
@@ -177,8 +180,8 @@ struct supports_inequality<
             decltype(std::declval<U>() != std::declval<T>())
             >
     >: public std::integral_constant<bool,
-               std::is_same<bool, decltype(std::declval<T>() != std::declval<U>())>::value
-            && std::is_same<bool, decltype(std::declval<U>() != std::declval<T>())>::value
+               is_contextual_convertible_to_bool<decltype(std::declval<T>() != std::declval<U>())>::value
+            && is_contextual_convertible_to_bool<decltype(std::declval<U>() != std::declval<T>())>::value
             >
 {};
 
@@ -250,14 +253,7 @@ struct supports_sub_assign<
    is_
    ***************************************************************************************************** */
 
-template <typename T, typename U>
-struct is_equality_comparable: public std::integral_constant<bool,
-        supports_equality<T, U>::value && supports_inequality<T, U>::value
-        >
-{};
-
-
-template <typename T, typename = void>
+template <typename T, typename>
 struct is_contextual_convertible_to_bool: public std::false_type
 {};
 
@@ -266,6 +262,68 @@ struct is_contextual_convertible_to_bool<T, void_t<
             decltype(std::declval<T>() ? true : false)
         >
     >: public std::true_type
+{};
+
+
+template <typename T, typename U>
+struct is_equality_comparable: public std::integral_constant<bool,
+        supports_equality<T, U>::value && supports_inequality<T, U>::value
+        >
+{};
+
+
+template <typename T, typename U, typename = void>
+struct is_less_than_comparable: public std::false_type
+{};
+
+template <typename T, typename U>
+struct is_less_than_comparable<T, U, void_t<
+        decltype(std::declval<T>() < std::declval<U>())
+        >
+    >: public is_contextual_convertible_to_bool<
+                decltype(std::declval<T>() < std::declval<U>())
+                >
+{};
+
+
+template <typename T, typename U, typename = void>
+struct is_greater_than_comparable: public std::false_type
+{};
+
+template <typename T, typename U>
+struct is_greater_than_comparable<T, U, void_t<
+        decltype(std::declval<T>() > std::declval<U>())
+        >
+    >: public is_contextual_convertible_to_bool<
+                decltype(std::declval<T>() > std::declval<U>())
+                >
+{};
+
+
+template <typename T, typename U, typename = void>
+struct is_less_equal_comparable: public std::false_type
+{};
+
+template <typename T, typename U>
+struct is_less_equal_comparable<T, U, void_t<
+        decltype(std::declval<T>() <= std::declval<U>())
+        >
+    >: public is_contextual_convertible_to_bool<
+                decltype(std::declval<T>() <= std::declval<U>())
+                >
+{};
+
+template <typename T, typename U, typename = void>
+struct is_greater_equal_comparable: public std::false_type
+{};
+
+template <typename T, typename U>
+struct is_greater_equal_comparable<T, U, void_t<
+        decltype(std::declval<T>() >= std::declval<U>())
+        >
+    >: public is_contextual_convertible_to_bool<
+                decltype(std::declval<T>() >= std::declval<U>())
+                >
 {};
 
 template <typename T, typename U>

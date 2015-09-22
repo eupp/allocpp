@@ -18,18 +18,27 @@ struct class_with_rebind
 
 struct class_with_comparison_ops
 {
-    bool operator==(const class_with_comparison_ops& other)
+    bool operator==(const class_with_comparison_ops&) const
     {
-        ALLOC_UNUSED(other);
         return true;
     }
 
-    bool operator!=(const class_with_comparison_ops& other)
+    bool operator!=(const class_with_comparison_ops&) const
     {
-        ALLOC_UNUSED(other);
         return false;
     }
+
+    bool operator<(const class_with_comparison_ops&) const
+    {
+        return false;
+    }
+
+    bool operator<=(const class_with_comparison_ops&) const
+    {
+        return true;
+    }
 };
+
 
 struct class_with_arithmetic
 {
