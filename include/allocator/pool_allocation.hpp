@@ -72,7 +72,7 @@ public:
         if (m_manager->get_pool_ref_count(sizeof(T)) == 0) {
             typename pool_type::memory_blocks_range mb_range = m_pool->get_mem_blocks();
             for (auto it = mb_range.begin(); it != mb_range.end(); ++it) {
-                pointer ptr = pointer_cast_traits<pointer, byte_pointer>::reinterpet_pcast(it->get_memory_ptr());
+                pointer ptr = pointer_cast_traits<pointer>::reinterpret_pcast(it->get_memory_ptr());
                 base_policy::deallocate(ptr, it->size());
             }
             m_manager->erase_pool(sizeof(T));
@@ -130,12 +130,12 @@ public:
         if (!m_pool->is_memory_available()) {
             add_mem_block(m_block_size, hint);
         }
-        return pointer_cast_traits<pointer, byte_pointer>::reinterpet_pcast(m_pool->allocate());
+        return pointer_cast_traits<pointer>::reinterpret_pcast(m_pool->allocate());
     }
 
     void deallocate(const pointer& ptr, size_type n)
     {
-        byte_pointer byte_ptr = pointer_cast_traits<byte_pointer, pointer>::reinterpet_pcast(ptr);
+        byte_pointer byte_ptr = pointer_cast_traits<byte_pointer>::reinterpret_pcast(ptr);
         if (m_pool->is_owned(byte_ptr)) {
             m_pool->deallocate(byte_ptr);
             return;
@@ -167,7 +167,7 @@ private:
     void add_mem_block(size_type size, const const_void_pointer& hint = nullptr)
     {
         pointer mem = base_policy::allocate(size, pointer(nullptr), hint);
-        m_pool->add_mem_block(pointer_cast_traits<byte_pointer, pointer>::reinterpet_pcast(mem), size);
+        m_pool->add_mem_block(pointer_cast_traits<byte_pointer>::reinterpret_pcast(mem), size);
     }
 
     std::shared_ptr<pools_manager_type> m_manager;

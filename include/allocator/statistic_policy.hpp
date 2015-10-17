@@ -87,7 +87,7 @@ public:
     pointer allocate(size_type n, const pointer& ptr, const_void_pointer hint = nullptr)
     {
         if (m_stat) {
-            const_void_pointer void_ptr = pointer_cast_traits<const_void_pointer, pointer>::static_pcast(ptr);
+            const_void_pointer void_ptr = pointer_cast_traits<const_void_pointer>::static_pcast(ptr);
             m_stat->register_alloc(void_ptr, n * sizeof(T));
         }
         return base_policy::allocate(n, ptr, hint);
@@ -96,7 +96,7 @@ public:
     void deallocate(const pointer& ptr, size_type n)
     {
         if (m_stat) {
-            const_void_pointer void_ptr = pointer_cast_traits<const_void_pointer, pointer>::static_pcast(ptr);
+            const_void_pointer void_ptr = pointer_cast_traits<const_void_pointer>::static_pcast(ptr);
             m_stat->register_dealloc(void_ptr, n * sizeof(T));
         }
         base_policy::deallocate(ptr, n);

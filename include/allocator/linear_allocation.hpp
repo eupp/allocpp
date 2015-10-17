@@ -59,19 +59,19 @@ public:
 
     pointer get_storage() const noexcept
     {
-        return pointer_cast_traits<pointer, byte_pointer>::reinterpet_pcast(m_storage->get_storage());
+        return pointer_cast_traits<pointer>::reinterpret_pcast(m_storage->get_storage());
     }
 
     void set_storage(const pointer& ptr, size_type size) noexcept
     {
-        m_storage->set_storage(pointer_cast_traits<byte_pointer, pointer>::reinterpet_pcast(ptr),
+        m_storage->set_storage(pointer_cast_traits<byte_pointer>::reinterpret_pcast(ptr),
                                size * sizeof(T));
     }
 
     void allocate_storage(size_type size)
     {
         pointer mem = base_policy::allocate(size, nullptr);
-        m_storage->set_storage(pointer_cast_traits<byte_pointer, pointer>::reinterpet_pcast(mem),
+        m_storage->set_storage(pointer_cast_traits<byte_pointer>::reinterpret_pcast(mem),
                                size * sizeof(T));
     }
 
@@ -81,8 +81,8 @@ public:
             return ptr;
         }
         if (is_memory_available(n)) {
-            return pointer_cast_traits<pointer, byte_pointer>
-                    ::reinterpet_pcast(m_storage->allocate(n * sizeof(T)));
+            return pointer_cast_traits<pointer>
+                    ::reinterpret_pcast(m_storage->allocate(n * sizeof(T)));
         }
         return base_policy::allocate(n, ptr, hint);
     }
@@ -92,7 +92,7 @@ public:
         if (!ptr) {
             return;
         }
-        if (m_storage->is_owned(pointer_cast_traits<byte_pointer, pointer>::reinterpet_pcast(ptr))) {
+        if (m_storage->is_owned(pointer_cast_traits<byte_pointer>::reinterpret_pcast(ptr))) {
             return;
         }
         base_policy::deallocate(ptr, n);

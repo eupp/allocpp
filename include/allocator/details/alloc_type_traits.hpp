@@ -5,6 +5,7 @@
 #include <memory>
 #include <cstddef>
 
+#include "pointer_cast.hpp"
 #include "is_swappable.hpp"
 
 namespace alloc_utility
@@ -332,6 +333,7 @@ using is_swappable = op::is_swappable<T, U>;
 template <typename T, typename U>
 using is_nothrow_swappable = op::is_nothrow_swappable<T, U>;
 
+
 template <typename T, typename = void>
 struct is_constructible_from_rebind: public std::false_type
 {};
@@ -343,6 +345,26 @@ struct is_constructible_from_rebind<T, typename std::enable_if<has_rebind<T>::va
         public std::integral_constant<bool,
         std::is_constructible<T, typename T::template rebind<details::placeholder>>::value
         >
+{};
+
+
+// this trait checks is object of pointer-like class (which is keeps memory occupied by objects
+// of type pointer::element_type) could be created by reinterpret_pcast from pointer-like class
+// of same type but with different inner (element) type U.
+
+template <typename pointer, typename U, typename = void>
+struct is_uninterpretable_memory: public std::false_type
+{};
+
+
+template <typename pointer, typename U>
+struct is_uninterpretable_memory<pointer, U, void_t<
+        decltype(
+            pointer_cast_traits<pointer>::reinterpret_pcast(
+                std::declval<typename pointer_cast_traits<pointer>::template rebind<U>>()
+            ))
+        >
+    >: public std::true_type
 {};
 
 /* *****************************************************************************************************

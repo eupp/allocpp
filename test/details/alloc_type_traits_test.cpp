@@ -191,6 +191,15 @@ TEST(alloc_type_traits_test, test_is_constrictible_from_rebind)
     EXPECT_FALSE(is_constructible_from_rebind<empty_class>::value);
 }
 
+TEST(alloc_type_traits_test, test_is_uninterpretable_memory)
+{
+    bool value1 = is_uninterpretable_memory<int*, char*>::value;
+    EXPECT_TRUE(value1);
+
+    bool value2 = is_uninterpretable_memory<std::shared_ptr<int>, std::shared_ptr<char>>::value;
+    EXPECT_FALSE(value2);
+}
+
 TEST(alloc_type_traits_test, test_enable_propagate)
 {
     EXPECT_TRUE(enable_propagate_on_copy<well_defined_policy<int>>::value);

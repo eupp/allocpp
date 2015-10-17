@@ -4,6 +4,7 @@
 #include <type_traits>
 
 #include "details/alloc_type_traits.hpp"
+#include "pointer_concepts.hpp"
 
 namespace alloc_utility
 {
@@ -21,6 +22,7 @@ struct is_alloc_policy: public std::integral_constant<bool,
         && std::is_nothrow_copy_assignable<T>::value
         && std::is_nothrow_move_assignable<T>::value
         && details::is_nothrow_swappable<T, T>::value
+//        && is_
         >
 {};
 
