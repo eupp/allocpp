@@ -35,3 +35,8 @@ TEST(concepts_test, test_is_random_access_ptr)
     EXPECT_TRUE(is_random_access_ptr<int*>::value);
     // EXPECT_FALSE()
 }
+
+TEST(concepts_test, test_is_raw_memory_ptr)
+{
+    EXPECT_TRUE(is_raw_memory_ptr<int*>::value);
+}

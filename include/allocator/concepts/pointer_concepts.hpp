@@ -65,6 +65,13 @@ struct is_random_access_ptr: public std::integral_constant<bool,
         >
 {};
 
+template <typename T>
+struct is_raw_memory_ptr: public std::integral_constant<bool,
+           is_random_access_ptr<T>::value
+        && details::is_uninterpretable_memory<T, typename pointer_cast_traits<T>::template rebind<void>>::value
+        >
+{};
+
 } // namespace concepts
 
 
