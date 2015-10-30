@@ -19,7 +19,6 @@ SOURCES += \
 HEADERS += \
     include/allocator/allocator.hpp \
     include/allocator/alloc_policies.hpp \
-    include/allocator/alloc_traits.hpp \
     include/allocator/macro.hpp \
     include/allocator/none_policy.hpp \
     include/allocator/pointer_cast.hpp \
@@ -37,7 +36,18 @@ HEADERS += \
     include/allocator/alloc_policy_concept.hpp \
     include/allocator/concepts/alloc_policy_concept.hpp \
     include/allocator/concepts/pointer_concepts.hpp \
-    test/test_types.hpp
+    test/test_types.hpp \
+    include/allocator/plc/details/allocation_request.hpp \
+    include/allocator/plc/details/allocation_response.hpp \
+    include/allocator/plc/details/deallocation_request.hpp \
+    include/allocator/plc/details/deallocation_response.hpp \
+    include/allocator/allocation_traits.hpp \
+    include/allocator/plc/allocation_mechanism.hpp \
+    include/allocator/ptr/pointer_factory.hpp \
+    include/allocator/allocation_request.hpp \
+    include/allocator/deallocation_response.hpp \
+    include/allocator/allocation_response.hpp \
+    include/allocator/deallocation_request.hpp
 
 INCLUDEPATH += include/allocator test
 

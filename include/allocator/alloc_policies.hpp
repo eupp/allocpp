@@ -17,7 +17,7 @@ class default_allocation_policy: public base_policy
 {
 public:
 
-    DECLARE_ALLOC_TRAITS(T, alloc_traits)
+    DECLARE_ALLOC_TRAITS(alloc_traits)
     DECLARE_REBIND_ALLOC(default_allocation_policy, T, alloc_traits, base_policy)
 
     default_allocation_policy() = default;
@@ -53,7 +53,7 @@ class throw_bad_alloc_policy: public base_policy
 {
 public:
 
-    DECLARE_ALLOC_TRAITS(T, alloc_traits)
+    DECLARE_ALLOC_TRAITS(alloc_traits)
     DECLARE_REBIND_ALLOC(throw_bad_alloc_policy, T, alloc_traits, base_policy)
 
     throw_bad_alloc_policy() = default;
@@ -80,7 +80,7 @@ class logging_policy: public base_policy
 {
 public:
 
-    DECLARE_ALLOC_TRAITS(T, alloc_traits)
+    DECLARE_ALLOC_TRAITS(alloc_traits)
     DECLARE_REBIND_ALLOC(logging_policy, T, alloc_traits, base_policy)
 
     logging_policy(std::ostream* log = nullptr):

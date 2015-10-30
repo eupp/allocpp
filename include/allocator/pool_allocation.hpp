@@ -26,7 +26,7 @@ class pool_allocation_policy: public base_policy
 
 public:
 
-    DECLARE_ALLOC_TRAITS(T, alloc_traits)
+    DECLARE_ALLOC_TRAITS(alloc_traits)
     DECLARE_REBIND_ALLOC(pool_allocation_policy, T, alloc_traits, base_policy)
 
     typedef std::true_type propagate_on_container_copy_assignment;

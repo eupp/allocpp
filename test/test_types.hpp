@@ -65,11 +65,11 @@ inline empty_class operator-(const class_with_arithmetic&, const class_with_arit
     return empty_class();
 }
 
-template <typename T, typename alloc_traits = alloc_utility::allocation_traits<T>,
+template <typename T, typename alloc_traits = alloc_utility::allocation_traits<T*>,
           typename base_policy = alloc_utility::none_policy<T>>
 struct well_defined_policy: public base_policy
 {
-    DECLARE_ALLOC_TRAITS(T, alloc_traits)
+    DECLARE_ALLOC_TRAITS(alloc_traits)
     DECLARE_REBIND_ALLOC(well_defined_policy, T, alloc_traits, base_policy)
 
     typedef std::true_type propagate_on_container_copy_assignment;
@@ -105,11 +105,11 @@ inline void swap(well_defined_policy<T, alloc_traits, base_policy>&,
                  well_defined_policy<T, alloc_traits, base_policy>&) noexcept
 {}
 
-template <typename T, typename alloc_traits = alloc_utility::allocation_traits<T>,
+template <typename T, typename alloc_traits = alloc_utility::allocation_traits<T*>,
           typename base_policy = alloc_utility::none_policy<T>>
 struct poorly_defined_policy: public base_policy
 {
-    DECLARE_ALLOC_TRAITS(T, alloc_traits)
+    DECLARE_ALLOC_TRAITS(alloc_traits)
     DECLARE_REBIND_ALLOC(poorly_defined_policy, T, alloc_traits, base_policy)
 
     poorly_defined_policy() = default;

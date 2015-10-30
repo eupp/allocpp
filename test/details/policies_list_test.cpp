@@ -10,35 +10,35 @@ using namespace alloc_utility;
 using namespace alloc_utility::details;
 
 
-class policies_list_test: public ::testing::Test
-{
-public:
-    typedef well_defined_policy<int> int_well_defined_policy;
-    typedef poorly_defined_policy<int> int_poorly_defined_policy;
-    typedef policies_list<allocation_traits<int>, int_poorly_defined_policy, int_well_defined_policy> ps_list_t;
+//class policies_list_test: public ::testing::Test
+//{
+//public:
+//    typedef well_defined_policy<int> int_well_defined_policy;
+//    typedef poorly_defined_policy<int> int_poorly_defined_policy;
+//    typedef policies_list<allocation_traits<int>, int_poorly_defined_policy, int_well_defined_policy> ps_list_t;
 
-    ps_list_t ps_list1;
-    ps_list_t ps_list2;
-};
+//    ps_list_t ps_list1;
+//    ps_list_t ps_list2;
+//};
 
-TEST_F(policies_list_test, test_comparison_ops)
-{
-    ps_list1.flag = ps_list2.flag = true;
-    EXPECT_TRUE(ps_list1.operator==(ps_list2));
-    EXPECT_FALSE(ps_list1.operator!=(ps_list2));
-    ps_list2.flag = false;
-    EXPECT_FALSE(ps_list1.operator==(ps_list2));
-    EXPECT_TRUE(ps_list1.operator!=(ps_list2));
-}
+//TEST_F(policies_list_test, test_comparison_ops)
+//{
+//    ps_list1.flag = ps_list2.flag = true;
+//    EXPECT_TRUE(ps_list1.operator==(ps_list2));
+//    EXPECT_FALSE(ps_list1.operator!=(ps_list2));
+//    ps_list2.flag = false;
+//    EXPECT_FALSE(ps_list1.operator==(ps_list2));
+//    EXPECT_TRUE(ps_list1.operator!=(ps_list2));
+//}
 
-TEST_F(policies_list_test, test_propagate_on)
-{
-    EXPECT_TRUE(ps_list_t::propagate_on_container_copy_assignment::value);
-    EXPECT_TRUE(ps_list_t::propagate_on_container_move_assignment::value);
-    EXPECT_TRUE(ps_list_t::propagate_on_container_swap::value);
+//TEST_F(policies_list_test, test_propagate_on)
+//{
+//    EXPECT_TRUE(ps_list_t::propagate_on_container_copy_assignment::value);
+//    EXPECT_TRUE(ps_list_t::propagate_on_container_move_assignment::value);
+//    EXPECT_TRUE(ps_list_t::propagate_on_container_swap::value);
 
-    typedef policies_list<allocation_traits<int>, int_poorly_defined_policy> poor_ps_list_t;
-    EXPECT_FALSE(poor_ps_list_t::propagate_on_container_copy_assignment::value);
-    EXPECT_FALSE(poor_ps_list_t::propagate_on_container_move_assignment::value);
-    EXPECT_FALSE(poor_ps_list_t::propagate_on_container_swap::value);
-}
+//    typedef policies_list<allocation_traits<int>, int_poorly_defined_policy> poor_ps_list_t;
+//    EXPECT_FALSE(poor_ps_list_t::propagate_on_container_copy_assignment::value);
+//    EXPECT_FALSE(poor_ps_list_t::propagate_on_container_move_assignment::value);
+//    EXPECT_FALSE(poor_ps_list_t::propagate_on_container_swap::value);
+//}

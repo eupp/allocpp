@@ -4,7 +4,7 @@
 #include <memory>
 #include <type_traits>
 
-#include "alloc_traits.hpp"
+#include "allocation_traits.hpp"
 #include "none_policy.hpp"
 #include "macro.hpp"
 #include "details/policies_list.hpp"
@@ -22,7 +22,7 @@ public:
     static_assert(sizeof...(alloc_policies) > 0,
                   "Allocator needs at least one allocation policy");
 
-    DECLARE_ALLOC_TRAITS(T, alloc_traits)
+    DECLARE_ALLOC_TRAITS(alloc_traits)
 
     template <typename U>
     using rebind_t = allocator<

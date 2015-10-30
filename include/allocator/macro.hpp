@@ -5,13 +5,21 @@
 
 #include "details/rebind.hpp"
 
-namespace alloc_utility
-{
+#define DECLARE_VOID_ALLOC_TRAITS(void_alloc_traits)                            \
+    typedef typename void_alloc_traits::void_pointer void_pointer;              \
+    typedef typename void_alloc_traits::const_void_pointer const_void_pointer;  \
+    typedef typename void_alloc_traits::size_type size_type;                    \
+    typedef typename void_alloc_traits::difference_type difference_type;        \
+    typedef void_alloc_traits void_allocation_traits;                           \
+                                                                                \
+    template <typename U>                                                       \
+    using rebind_pointer = typename void_alloc_traits::template rebind_pointer<U>;\
+    template <typename U>                                                       \
+    using rebind_const_pointer = typename alloc_traits::template rebind_const_pointer<U>;
 
-} // namespace alloc_utility
 
-#define DECLARE_ALLOC_TRAITS(T, alloc_traits)                                   \
-    typedef T value_type;                                                       \
+#define DECLARE_ALLOC_TRAITS(alloc_traits)                                      \
+    typedef typename alloc_traits::value_type value_type;                       \
     typedef typename alloc_traits::pointer pointer;                             \
     typedef typename alloc_traits::const_pointer const_pointer;                 \
     typedef typename alloc_traits::void_pointer void_pointer;                   \
@@ -27,16 +35,26 @@ namespace alloc_utility
     template <typename U>                                                       \
     using rebind_const_pointer = typename alloc_traits::template rebind_const_pointer<U>;
 
-    #define DECLARE_REBIND_ALLOC(alloc, T, ...)                                 \
-    template <typename U>                                                       \
-    using rebind = ::alloc_utility::details::rebind<alloc, U, __VA_ARGS__>;     \
-                                                                                \
+//#define DECLARE_REBIND_ALLOC(alloc, base, T...)                                  \
+//    template <typename U>                                                       \
+//    using rebind = ::alloc_utility::details::rebind<alloc, U, __VA_ARGS__>;     \
+
+#define DECLARE_REBIND_BASE_ALLOC(alloc, base, ...)                             \
     template <typename policy>                                                  \
-    using rebind_base = ::alloc_utility::details::rebind_base<alloc, T, policy, __VA_ARGS__>;                                                         \
+    using rebind_base = alloc<__VA_ARGS__, policy>;
 
 #define CHECK_IS_REBINDED_ALLOC(alloc)                                           \
     static_assert(std::is_same<alloc, rebind<typename alloc::value_type>>::value,\
         "Type should be rebinded allocation policy");
+
+#define DECLARE_ARBITRATOR(alloc, arbitrator)                                   \
+    private:                                                                    \
+        arbitrator m_alloc_arbitrator;                                          \
+    public:                                                                     \
+        arbitrator* get_arbitrator(alloc*)                                      \
+        {                                                                       \
+            return &m_alloc_arbitrator;                                         \
+        }
 
 #define ALLOC_UNUSED(expr) while(0) { (void)(expr); }
 

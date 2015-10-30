@@ -340,8 +340,6 @@ struct is_constructible_from_rebind: public std::false_type
 
 template <typename T>
 struct is_constructible_from_rebind<T, typename std::enable_if<has_rebind<T>::value>::type>:
-//        public std::true_type
-
         public std::integral_constant<bool,
         std::is_constructible<T, typename T::template rebind<details::placeholder>>::value
         >

@@ -6,12 +6,12 @@
 namespace alloc_utility
 {
 
-template <typename T, typename alloc_traits = allocation_traits<T>>
+template <typename T, typename alloc_traits = allocation_traits<T*>>
 class none_policy
 {
 public:
 
-    DECLARE_ALLOC_TRAITS(T, alloc_traits)
+    DECLARE_ALLOC_TRAITS(alloc_traits)
 
     template <typename U>
     using rebind = none_policy<U, typename alloc_traits::template rebind<U>>;
