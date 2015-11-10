@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "allocator.hpp"
-#include "alloc_policies.hpp"
+//#include "alloc_policies.hpp"
 #include "details/memory_pool.hpp"
 #include "pool_allocation.hpp"
 #include "statistic_policy.hpp"

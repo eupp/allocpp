@@ -3,7 +3,6 @@
 #include <gtest/gtest.h>
 
 #include "allocator.hpp"
-#include "alloc_policies.hpp"
 
 using namespace alloc_utility;
 
@@ -16,8 +15,8 @@ struct C
     {}
 };
 
-typedef allocator<int, allocation_traits<int>, default_allocation_policy<int>> simple_int_allocator;
-typedef allocator<C, allocation_traits<C>, default_allocation_policy<C>> simple_object_allocator;
+//typedef allocator<int, allocation_traits<int>, default_allocation_policy<int>> simple_int_allocator;
+//typedef allocator<C, allocation_traits<C>, default_allocation_policy<C>> simple_object_allocator;
 
 //TEST(smoke_test, test_allocate) {
 //    simple_int_allocator alloc;

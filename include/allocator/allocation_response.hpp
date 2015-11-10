@@ -1,7 +1,7 @@
 #ifndef ALLOCATION_RESPONSE_HPP
 #define ALLOCATION_RESPONSE_HPP
 
-#include "macro.hpp"
+#include "macro_traits.hpp"
 
 namespace alloc_utility {
 

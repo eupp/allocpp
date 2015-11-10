@@ -1,7 +1,7 @@
 #ifndef ALLOCATION_REQUEST_HPP
 #define ALLOCATION_REQUEST_HPP
 
-#include "macro.hpp"
+#include "macro_traits.hpp"
 
 namespace alloc_utility {
 

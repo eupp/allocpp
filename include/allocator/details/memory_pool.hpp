@@ -12,7 +12,7 @@
 #include <utility>
 
 #include "pointer_cast.hpp"
-#include "macro.hpp"
+#include "macro_traits.hpp"
 
 namespace alloc_utility
 {

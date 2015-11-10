@@ -3,9 +3,9 @@
 
 #include <type_traits>
 
-#include "alloc_traits.hpp"
-#include "none_policy.hpp"
-#include "macro.hpp"
+#include "allocation_traits.hpp"
+#include "plc/none.hpp"
+#include "macro_traits.hpp"
 
 struct empty_class
 {};
@@ -65,69 +65,69 @@ inline empty_class operator-(const class_with_arithmetic&, const class_with_arit
     return empty_class();
 }
 
-template <typename T, typename alloc_traits = alloc_utility::allocation_traits<T*>,
-          typename base_policy = alloc_utility::none_policy<T>>
-struct well_defined_policy: public base_policy
-{
-    DECLARE_ALLOC_TRAITS(alloc_traits)
-    DECLARE_REBIND_ALLOC(well_defined_policy, T, alloc_traits, base_policy)
+//template <typename T, typename alloc_traits = alloc_utility::allocation_traits<T*>,
+//          typename base_policy = alloc_utility::plc::none<alloc_traits>>
+//struct well_defined_policy: public base_policy
+//{
+//    DECLARE_ALLOC_TRAITS(alloc_traits)
+//    DECLARE_REBIND_ALLOC(well_defined_policy, T, alloc_traits, base_policy)
 
-    typedef std::true_type propagate_on_container_copy_assignment;
-    typedef std::true_type propagate_on_container_move_assignment;
-    typedef std::true_type propagate_on_container_swap;
+//    typedef std::true_type propagate_on_container_copy_assignment;
+//    typedef std::true_type propagate_on_container_move_assignment;
+//    typedef std::true_type propagate_on_container_swap;
 
-    well_defined_policy() = default;
-    well_defined_policy(const well_defined_policy&) = default;
+//    well_defined_policy() = default;
+//    well_defined_policy(const well_defined_policy&) = default;
 
-    template <typename U>
-    well_defined_policy(const rebind<U>& other):
-        flag(other.flag)
-    {}
+//    template <typename U>
+//    well_defined_policy(const rebind<U>& other):
+//        flag(other.flag)
+//    {}
 
-    well_defined_policy& operator=(const well_defined_policy&) = default;
-    well_defined_policy& operator=(well_defined_policy&&) = default;
+//    well_defined_policy& operator=(const well_defined_policy&) = default;
+//    well_defined_policy& operator=(well_defined_policy&&) = default;
 
-    bool operator==(const well_defined_policy& other) const noexcept
-    {
-        return flag == other.flag;
-    }
+//    bool operator==(const well_defined_policy& other) const noexcept
+//    {
+//        return flag == other.flag;
+//    }
 
-    bool operator!=(const well_defined_policy& other) const noexcept
-    {
-        return flag != other.flag;
-    }
+//    bool operator!=(const well_defined_policy& other) const noexcept
+//    {
+//        return flag != other.flag;
+//    }
 
-    bool flag;
-};
+//    bool flag;
+//};
 
-template <typename T, typename alloc_traits, typename base_policy>
-inline void swap(well_defined_policy<T, alloc_traits, base_policy>&,
-                 well_defined_policy<T, alloc_traits, base_policy>&) noexcept
-{}
+//template <typename T, typename alloc_traits, typename base_policy>
+//inline void swap(well_defined_policy<T, alloc_traits, base_policy>&,
+//                 well_defined_policy<T, alloc_traits, base_policy>&) noexcept
+//{}
 
-template <typename T, typename alloc_traits = alloc_utility::allocation_traits<T*>,
-          typename base_policy = alloc_utility::none_policy<T>>
-struct poorly_defined_policy: public base_policy
-{
-    DECLARE_ALLOC_TRAITS(alloc_traits)
-    DECLARE_REBIND_ALLOC(poorly_defined_policy, T, alloc_traits, base_policy)
+//template <typename T, typename alloc_traits = alloc_utility::allocation_traits<T*>,
+//          typename base_policy = alloc_utility::none_policy<T>>
+//struct poorly_defined_policy: public base_policy
+//{
+//    DECLARE_ALLOC_TRAITS(alloc_traits)
+//    DECLARE_REBIND_ALLOC(poorly_defined_policy, T, alloc_traits, base_policy)
 
-    poorly_defined_policy() = default;
-    poorly_defined_policy(const poorly_defined_policy&) = default;
-    poorly_defined_policy(poorly_defined_policy&&) = default;
+//    poorly_defined_policy() = default;
+//    poorly_defined_policy(const poorly_defined_policy&) = default;
+//    poorly_defined_policy(poorly_defined_policy&&) = default;
 
-    template <typename U>
-    poorly_defined_policy(const rebind<U>& )
-    {}
+//    template <typename U>
+//    poorly_defined_policy(const rebind<U>& )
+//    {}
 
-    poorly_defined_policy& operator=(const poorly_defined_policy&) = default;
-    poorly_defined_policy& operator=(poorly_defined_policy&&) = default;
-};
+//    poorly_defined_policy& operator=(const poorly_defined_policy&) = default;
+//    poorly_defined_policy& operator=(poorly_defined_policy&&) = default;
+//};
 
-template <typename T, typename alloc_traits, typename base_policy>
-inline void swap(poorly_defined_policy<T, alloc_traits, base_policy>&,
-                 poorly_defined_policy<T, alloc_traits, base_policy>&) noexcept
-{}
+//template <typename T, typename alloc_traits, typename base_policy>
+//inline void swap(poorly_defined_policy<T, alloc_traits, base_policy>&,
+//                 poorly_defined_policy<T, alloc_traits, base_policy>&) noexcept
+//{}
 
 namespace adl_check {
 

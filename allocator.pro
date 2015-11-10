@@ -14,12 +14,11 @@ SOURCES += \
     test/details/alloc_type_traits_test.cpp \
     test/details/policies_list_test.cpp \
     test/details/rebind_test.cpp \
-    test/concepts/concepts_test.cpp
+    test/concepts/concepts_test.cpp \
+    test/plc/malloc_allocation_test.cpp
 
 HEADERS += \
     include/allocator/allocator.hpp \
-    include/allocator/alloc_policies.hpp \
-    include/allocator/macro.hpp \
     include/allocator/none_policy.hpp \
     include/allocator/pointer_cast.hpp \
     include/allocator/pool_allocation.hpp \
@@ -47,7 +46,11 @@ HEADERS += \
     include/allocator/allocation_request.hpp \
     include/allocator/deallocation_response.hpp \
     include/allocator/allocation_response.hpp \
-    include/allocator/deallocation_request.hpp
+    include/allocator/deallocation_request.hpp \
+    include/allocator/plc/malloc_mechanism.hpp \
+    include/allocator/plc/none.hpp \
+    include/allocator/macro_traits.hpp \
+    include/allocator/macro_alloc.hpp
 
 INCLUDEPATH += include/allocator test
 

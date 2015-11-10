@@ -10,12 +10,12 @@
 using namespace alloc_utility;
 using namespace alloc_utility::concepts;
 
-TEST(concepts_test, test_is_alloc_policy)
-{
-    EXPECT_TRUE(is_alloc_policy<well_defined_policy<int>>::value);
-    EXPECT_TRUE(is_alloc_policy<poorly_defined_policy<int>>::value);
-    EXPECT_FALSE(is_alloc_policy<empty_class>::value);
-}
+//TEST(concepts_test, test_is_alloc_policy)
+//{
+//    EXPECT_TRUE(is_alloc_policy<well_defined_policy<int>>::value);
+//    EXPECT_TRUE(is_alloc_policy<poorly_defined_policy<int>>::value);
+//    EXPECT_FALSE(is_alloc_policy<empty_class>::value);
+//}
 
 TEST(concepts_test, test_is_single_object_ptr)
 {

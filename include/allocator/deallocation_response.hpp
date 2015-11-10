@@ -1,7 +1,7 @@
 #ifndef DEALLOCATION_RESPONSE_HPP
 #define DEALLOCATION_RESPONSE_HPP
 
-#include "macro.hpp"
+#include "macro_traits.hpp"
 
 namespace alloc_utility {
 
@@ -12,7 +12,7 @@ public:
 
     DECLARE_VOID_ALLOC_TRAITS(void_alloc_traits)
 
-    deallocation_response(bool succeeded = false)
+    deallocation_response(bool succeeded)
         : m_success(succeeded)
     {}
 

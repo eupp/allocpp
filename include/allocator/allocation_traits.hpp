@@ -83,6 +83,15 @@ public:
     }
 };
 
+template <typename traits_1, typename traits_2>
+struct void_alloc_traits_equality: public std::integral_constant<bool,
+            std::is_same<typename traits_1::void_pointer, typename traits_2::void_pointer>::value
+        &&  std::is_same<typename traits_1::const_void_pointer, typename traits_2::const_void_pointer>::value
+        &&  std::is_same<typename traits_1::size_type, typename traits_2::size_type>::value
+        &&  std::is_same<typename traits_1::difference_type, typename traits_2::difference_type>::value
+        >
+{};
+
 }
 
 #endif // ALLOC_TRAITS_HPP

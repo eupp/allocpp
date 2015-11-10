@@ -6,27 +6,27 @@
 
 #include <gtest/gtest.h>
 
-#include "allocator.hpp"
-#include "alloc_traits.hpp"
-#include "alloc_policies.hpp"
-#include "pool_allocation.hpp"
-#include "statistic_policy.hpp"
+//#include "allocator.hpp"
+//#include "alloc_traits.hpp"
+//#include "alloc_policies.hpp"
+//#include "pool_allocation.hpp"
+//#include "statistic_policy.hpp"
 
-using namespace alloc_utility;
+//using namespace alloc_utility;
 
-class element
-{
-public:
-    explicit element(int a): m_a(2 * a) {}
-    friend bool operator==(const element& e1, const element& e2);
-private:
-    int m_a;
-};
+//class element
+//{
+//public:
+//    explicit element(int a): m_a(2 * a) {}
+//    friend bool operator==(const element& e1, const element& e2);
+//private:
+//    int m_a;
+//};
 
-bool operator==(const element& e1, const element& e2)
-{
-    return e1.m_a == e2.m_a;
-}
+//bool operator==(const element& e1, const element& e2)
+//{
+//    return e1.m_a == e2.m_a;
+//}
 
 //class stl_test: public ::testing::Test
 //{

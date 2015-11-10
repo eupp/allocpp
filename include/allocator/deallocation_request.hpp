@@ -1,7 +1,7 @@
 #ifndef DEALLOCATION_REQUEST_HPP
 #define DEALLOCATION_REQUEST_HPP
 
-#include "macro.hpp"
+#include "macro_traits.hpp"
 
 namespace alloc_utility {
 
@@ -12,8 +12,8 @@ public:
 
     DECLARE_VOID_ALLOC_TRAITS(void_alloc_traits)
 
-    deallocation_request(const void_pointer ptr = nullptr)
-        : m_ptr(pointer)
+    deallocation_request(const void_pointer& ptr = nullptr)
+        : m_ptr(ptr)
     {}
 
     void_pointer pointer() const

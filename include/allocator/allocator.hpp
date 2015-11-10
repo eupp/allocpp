@@ -5,8 +5,7 @@
 #include <type_traits>
 
 #include "allocation_traits.hpp"
-#include "none_policy.hpp"
-#include "macro.hpp"
+#include "macro_traits.hpp"
 #include "details/policies_list.hpp"
 
 namespace alloc_utility

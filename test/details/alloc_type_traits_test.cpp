@@ -184,12 +184,12 @@ TEST(alloc_type_traits_test, test_is_swappable)
     EXPECT_FALSE(value3);
 }
 
-TEST(alloc_type_traits_test, test_is_constrictible_from_rebind)
-{
-    EXPECT_TRUE(is_constructible_from_rebind<well_defined_policy<int>>::value);
-    EXPECT_FALSE(is_constructible_from_rebind<class_with_rebind>::value);
-    EXPECT_FALSE(is_constructible_from_rebind<empty_class>::value);
-}
+//TEST(alloc_type_traits_test, test_is_constrictible_from_rebind)
+//{
+//    EXPECT_TRUE(is_constructible_from_rebind<well_defined_policy<int>>::value);
+//    EXPECT_FALSE(is_constructible_from_rebind<class_with_rebind>::value);
+//    EXPECT_FALSE(is_constructible_from_rebind<empty_class>::value);
+//}
 
 TEST(alloc_type_traits_test, test_is_uninterpretable_memory)
 {
@@ -200,17 +200,17 @@ TEST(alloc_type_traits_test, test_is_uninterpretable_memory)
     EXPECT_FALSE(value2);
 }
 
-TEST(alloc_type_traits_test, test_enable_propagate)
-{
-    EXPECT_TRUE(enable_propagate_on_copy<well_defined_policy<int>>::value);
-    EXPECT_FALSE(enable_propagate_on_copy<poorly_defined_policy<int>>::value);
+//TEST(alloc_type_traits_test, test_enable_propagate)
+//{
+//    EXPECT_TRUE(enable_propagate_on_copy<well_defined_policy<int>>::value);
+//    EXPECT_FALSE(enable_propagate_on_copy<poorly_defined_policy<int>>::value);
 
-    EXPECT_TRUE(enable_propagate_on_move<well_defined_policy<int>>::value);
-    EXPECT_FALSE(enable_propagate_on_move<poorly_defined_policy<int>>::value);
+//    EXPECT_TRUE(enable_propagate_on_move<well_defined_policy<int>>::value);
+//    EXPECT_FALSE(enable_propagate_on_move<poorly_defined_policy<int>>::value);
 
-    EXPECT_TRUE(enable_propagate_on_swap<well_defined_policy<int>>::value);
-    EXPECT_FALSE(enable_propagate_on_swap<poorly_defined_policy<int>>::value);
-}
+//    EXPECT_TRUE(enable_propagate_on_swap<well_defined_policy<int>>::value);
+//    EXPECT_FALSE(enable_propagate_on_swap<poorly_defined_policy<int>>::value);
+//}
 
 TEST(alloc_type_traits_test, test_enable_difference_type)
 {

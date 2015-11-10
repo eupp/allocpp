@@ -6,11 +6,11 @@
 #include "test_types.hpp"
 
 #include "allocator.hpp"
-#include "alloc_traits.hpp"
+#include "allocation_traits.hpp"
 #include "details/rebind.hpp"
 
 #include "pool_allocation.hpp"
-#include "alloc_policies.hpp"
+//#include "alloc_policies.hpp"
 #include "statistic_policy.hpp"
 
 using namespace alloc_utility;

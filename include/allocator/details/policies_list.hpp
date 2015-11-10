@@ -4,8 +4,8 @@
 #include <type_traits>
 #include <utility>
 
-#include "none_policy.hpp"
 #include "alloc_type_traits.hpp"
+#include "plc/none.hpp"
 
 namespace alloc_utility
 {
@@ -121,7 +121,7 @@ namespace details
     };
 
     template <typename alloc_traits>
-    class policies_list<alloc_traits>: public none_policy<typename alloc_traits::value_type, alloc_traits>
+    class policies_list<alloc_traits>: public none<alloc_traits>
     {
     public:
 

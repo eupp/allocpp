@@ -1,5 +1,5 @@
-#ifndef MACRO_HPP
-#define MACRO_HPP
+#ifndef MACRO_TRAITS_HPP
+#define MACRO_TRAITS_HPP
 
 #include <type_traits>
 
@@ -10,12 +10,7 @@
     typedef typename void_alloc_traits::const_void_pointer const_void_pointer;  \
     typedef typename void_alloc_traits::size_type size_type;                    \
     typedef typename void_alloc_traits::difference_type difference_type;        \
-    typedef void_alloc_traits void_allocation_traits;                           \
-                                                                                \
-    template <typename U>                                                       \
-    using rebind_pointer = typename void_alloc_traits::template rebind_pointer<U>;\
-    template <typename U>                                                       \
-    using rebind_const_pointer = typename alloc_traits::template rebind_const_pointer<U>;
+    typedef void_alloc_traits void_allocation_traits_t;
 
 
 #define DECLARE_ALLOC_TRAITS(alloc_traits)                                      \
@@ -28,20 +23,21 @@
     typedef typename alloc_traits::const_reference const_reference;             \
     typedef typename alloc_traits::size_type size_type;                         \
     typedef typename alloc_traits::difference_type difference_type;             \
-    typedef alloc_traits allocation_traits;                                     \
+    typedef alloc_traits allocation_traits_t;                                   \
                                                                                 \
     template <typename U>                                                       \
     using rebind_pointer = typename alloc_traits::template rebind_pointer<U>;   \
     template <typename U>                                                       \
     using rebind_const_pointer = typename alloc_traits::template rebind_const_pointer<U>;
 
+
 //#define DECLARE_REBIND_ALLOC(alloc, base, T...)                                  \
 //    template <typename U>                                                       \
 //    using rebind = ::alloc_utility::details::rebind<alloc, U, __VA_ARGS__>;     \
 
-#define DECLARE_REBIND_BASE_ALLOC(alloc, base, ...)                             \
-    template <typename policy>                                                  \
-    using rebind_base = alloc<__VA_ARGS__, policy>;
+#define DECLARE_REBIND_ALLOC(alloc, ...)                                        \
+    template <typename traits, typename policy>                                 \
+    using rebind_alloc = alloc<__VA_ARGS__, traits, policy>;
 
 #define CHECK_IS_REBINDED_ALLOC(alloc)                                           \
     static_assert(std::is_same<alloc, rebind<typename alloc::value_type>>::value,\
@@ -58,4 +54,4 @@
 
 #define ALLOC_UNUSED(expr) while(0) { (void)(expr); }
 
-#endif // MACRO_HPP
+#endif // MACRO_TRAITS_HPP
