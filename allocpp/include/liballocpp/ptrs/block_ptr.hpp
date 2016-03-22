@@ -59,6 +59,16 @@ public:
     {
         return m_size;
     }
+
+    friend bool operator==(const block_ptr& p1, const block_ptr& p2)
+    {
+        return p1.m_decorated == p2.m_decorated && p1.m_size == p2.m_size;
+    }
+
+    friend bool operator!=(const pointer_decorator& p1, const pointer_decorator& p2)
+    {
+        return !(p1 == p2);
+    }
 private:
     size_type m_size;
 };
