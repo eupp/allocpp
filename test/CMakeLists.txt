@@ -1,8 +1,7 @@
 enable_testing()
 
 set(allocpp_TESTS
-            tmp.cpp
-        )
+        pointer_decorator_test.cpp)
 
 find_package(Threads REQUIRED)
 

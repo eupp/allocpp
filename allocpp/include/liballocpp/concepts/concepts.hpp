@@ -5,7 +5,7 @@
 #include <utility>
 #include <boost/concept_check.hpp>
 
-#include <liballocpp/utils/pointer_traits.hpp>
+#include <liballocpp/utils/pointer.hpp>
 
 template <typename... Ts>
 void ALLOCPP_UNUSED(Ts&&...) {}
@@ -43,8 +43,8 @@ template <typename T>
 class ObjectPtr :
     NullablePtr<T>
 {
-    typedef typename ::allocpp::utils::pointer_traits<T>::element_type element_type;
-    typedef typename ::allocpp::utils::pointer_traits<T>::reference reference_type;
+    typedef typename utils::pointer_traits<T>::element_type element_type;
+    typedef typename utils::pointer_traits<T>::reference reference_type;
 public:
     ALLOCPP_CONCEPT_USAGE(ObjectPtr)
     {
@@ -61,9 +61,9 @@ template <typename T>
 class ArrayPtr :
     ObjectPtr<T>
 {
-    typedef typename ::allocpp::utils::pointer_traits<T>::element_type element_type;
-    typedef typename ::allocpp::utils::pointer_traits<T>::size_type size_type;
-    typedef typename ::allocpp::utils::pointer_traits<T>::reference reference_type;
+    typedef typename utils::pointer_traits<T>::element_type element_type;
+    typedef typename utils::pointer_traits<T>::size_type size_type;
+    typedef typename utils::pointer_traits<T>::reference reference_type;
 public:
     ALLOCPP_CONCEPT_USAGE(ArrayPtr)
     {
