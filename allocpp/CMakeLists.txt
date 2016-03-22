@@ -1,7 +1,7 @@
 FIND_PACKAGE(Boost 1.54)
 
 set(allocpp_LIB_HDRS
-        include/liballocpp/concept/concept.hpp
+        include/liballocpp/concepts/concepts.hpp
         )
 
 message(WARNING ${Boost_INCLUDE_DIR})

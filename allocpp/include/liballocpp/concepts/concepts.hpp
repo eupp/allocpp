@@ -5,7 +5,7 @@
 #include <utility>
 #include <boost/concept_check.hpp>
 
-#include <liballocpp/util/pointer_traits.hpp>
+#include <liballocpp/utils/pointer_traits.hpp>
 
 template <typename... Ts>
 void ALLOCPP_UNUSED(Ts&&...) {}
@@ -13,7 +13,7 @@ void ALLOCPP_UNUSED(Ts&&...) {}
 #define ALLOCPP_CONCEPT_USAGE BOOST_CONCEPT_USAGE
 #define ALLOCPP_CONCEPT_ASSERT BOOST_CONCEPT_ASSERT
 
-namespace allocpp { namespace concept {
+namespace allocpp { namespace concepts {
 
 template <typename T>
 class NullablePtr :
@@ -43,16 +43,45 @@ template <typename T>
 class ObjectPtr :
     NullablePtr<T>
 {
-    typedef typename ::allocpp::util::pointer_traits<T>::reference_type reference_type;
+    typedef typename ::allocpp::utils::pointer_traits<T>::element_type element_type;
+    typedef typename ::allocpp::utils::pointer_traits<T>::reference reference_type;
 public:
     ALLOCPP_CONCEPT_USAGE(ObjectPtr)
     {
         reference_type ref = *p;
+        *p = e;
         ALLOCPP_UNUSED(ref);
     }
 private:
     T p;
+    element_type e;
 };
+
+template <typename T>
+class ArrayPtr :
+    ObjectPtr<T>
+{
+    typedef typename ::allocpp::utils::pointer_traits<T>::element_type element_type;
+    typedef typename ::allocpp::utils::pointer_traits<T>::size_type size_type;
+    typedef typename ::allocpp::utils::pointer_traits<T>::reference reference_type;
+public:
+    ALLOCPP_CONCEPT_USAGE(ArrayPtr)
+    {
+        reference_type ref = p[i];
+        p[i] = e;
+        ALLOCPP_UNUSED(ref);
+    }
+private:
+    T p;
+    size_type i;
+    element_type e;
+};
+
+template <typename T>
+class RandomAccessPtr :
+    ArrayPtr<T>,
+    boost::RandomAccessIterator<T>
+{};
 
 }}
 

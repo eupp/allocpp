@@ -2,9 +2,9 @@
 
 #include <boost/concept_check.hpp>
 
-#include "liballocpp/concept/concept.hpp"
+#include <liballocpp/concepts/concepts.hpp>
 
-using namespace allocpp::concept;
+using namespace allocpp::concepts;
 
 #define MY_ASSERT_EQ ASSERT_EQ
 
@@ -27,4 +27,9 @@ TEST(tmp, tmp)
     int v = 0;
     MY_ASSERT_EQ(nullptr, test_nullable_ptr(nullptr));
     MY_ASSERT_EQ(&v, test_object_ptr(&v));
+    bool b = std::is_same<
+            allocpp::concepts::random_access_ptr_tag,
+            typename allocpp::utils::pointer_traits<int*>::concept_tag
+        >::value;
+    ASSERT_TRUE(b);
 }
