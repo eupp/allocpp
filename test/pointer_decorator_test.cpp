@@ -2,6 +2,7 @@
 
 #include <type_traits>
 
+#include <liballocpp/concepts/concepts.hpp>
 #include <liballocpp/concepts/pointer_concept_tag.hpp>
 #include <liballocpp/ptrs/pointer_decorator.hpp>
 
@@ -12,8 +13,13 @@ namespace {
 
 typedef pointer_decorator<int*, object_ptr_tag> decorated1;
 typedef pointer_decorator<decorated1, object_ptr_tag> decorated2;
+typedef pointer_decorator<int*, array_ptr_tag> decorated3;
 
 }
+
+ALLOCPP_CONCEPT_ASSERT((ObjectPtr<decorated1>));
+ALLOCPP_CONCEPT_ASSERT((ObjectPtr<decorated2>));
+ALLOCPP_CONCEPT_ASSERT((ArrayPtr<decorated3>));
 
 TEST(pointer_decorator_test, test_types)
 {
@@ -113,4 +119,19 @@ TEST(pointer_decorator_test, test_dereference)
 
     *p2 = 2;
     ASSERT_EQ(2, val);
+}
+
+TEST(pointer_decorator_test, test_array_subscript)
+{
+    int val[2] = {0};
+    decorated3 p(val);
+
+    ASSERT_EQ(0, p[0]);
+    ASSERT_EQ(0, p[1]);
+
+    p[1] = 1;
+    ASSERT_EQ(1, val[1]);
+
+    p[1] = 2;
+    ASSERT_EQ(2, val[1]);
 }

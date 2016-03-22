@@ -16,12 +16,12 @@ void ALLOCPP_UNUSED(Ts&&...) {}
 namespace allocpp { namespace concepts {
 
 template <typename T>
-class NullablePtr :
-    boost::DefaultConstructible<T>,
-    boost::CopyConstructible<T>,
-    boost::Assignable<T>,
-    boost::EqualityComparable<T>,
-    boost::Convertible<T, bool>
+class NullablePtr
+    : boost::DefaultConstructible<T>
+    , boost::CopyConstructible<T>
+    , boost::Assignable<T>
+    , boost::EqualityComparable<T>
+    , boost::Convertible<T, bool>
 {
 public:
     ALLOCPP_CONCEPT_USAGE(NullablePtr)
@@ -40,8 +40,8 @@ private:
 };
 
 template <typename T>
-class ObjectPtr :
-    NullablePtr<T>
+class ObjectPtr
+    : NullablePtr<T>
 {
     typedef typename utils::pointer_traits<T>::element_type element_type;
     typedef typename utils::pointer_traits<T>::reference reference_type;
@@ -58,8 +58,8 @@ private:
 };
 
 template <typename T>
-class ArrayPtr :
-    ObjectPtr<T>
+class ArrayPtr
+    : ObjectPtr<T>
 {
     typedef typename utils::pointer_traits<T>::element_type element_type;
     typedef typename utils::pointer_traits<T>::size_type size_type;
@@ -78,9 +78,9 @@ private:
 };
 
 template <typename T>
-class RandomAccessPtr :
-    ArrayPtr<T>,
-    boost::RandomAccessIterator<T>
+class RandomAccessPtr
+    : ArrayPtr<T>
+    , boost::RandomAccessIterator<T>
 {};
 
 }}
