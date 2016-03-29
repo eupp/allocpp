@@ -55,6 +55,11 @@ public:
     block_ptr& operator=(const block_ptr&) = default;
     block_ptr& operator=(block_ptr&&) = default;
 
+    Ptr ptr() const
+    {
+        return m_decorated;
+    }
+
     size_type size() const
     {
         return m_size;
