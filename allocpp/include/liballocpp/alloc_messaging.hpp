@@ -75,29 +75,34 @@ public:
     public:
         builder() = default;
 
-        void set_size(size_type size)
+        builder& set_size(size_type size)
         {
             m_request.m_size = size;
+            return *this;
         }
 
-        void set_alignment(size_type alignment)
+        builder& set_alignment(size_type alignment)
         {
             m_request.m_alignment = alignment;
+            return *this;
         }
 
-        void set_flag(size_t i, bool flag)
+        builder& set_flag(size_t i, bool flag)
         {
             m_request.m_flags[i] = flag;
+            return *this;
         }
 
-        void set_hint(pointer_type hint)
+        builder& set_hint(pointer_type hint)
         {
             m_request.m_hint = hint;
+            return *this;
         }
 
-        void set_extra(const utils::any& extra)
+        builder& set_extra(const utils::any& extra)
         {
             m_request.m_extra = extra;
+            return *this;
         }
 
         alloc_request build() const
@@ -175,24 +180,28 @@ public:
     public:
         builder() = default;
 
-        void set_memory_block(const block_ptr& block)
+        builder& set_memory_block(const block_ptr& block)
         {
             m_response.m_block = block;
+            return *this;
         }
 
-        void set_alignment(size_type alignment)
+        builder& set_alignment(size_type alignment)
         {
             m_response.m_alignment = alignment;
+            return *this;
         }
 
-        void set_flag(size_t i, bool flag)
+        builder& set_flag(size_t i, bool flag)
         {
             m_response.m_flags[i] = flag;
+            return *this;
         }
 
-        void set_extra(const utils::any& extra)
+        builder& set_extra(const utils::any& extra)
         {
             m_response.m_extra = extra;
+            return *this;
         }
 
         alloc_response build() const
@@ -268,24 +277,28 @@ public:
     public:
         builder() = default;
 
-        void set_memory_block(const block_ptr& block)
+        builder& set_memory_block(const block_ptr& block)
         {
             m_request.m_block = block;
+            return *this;
         }
 
-        void set_ptr(pointer_type ptr)
+        builder& set_ptr(pointer_type ptr)
         {
             m_request.m_block = block_ptr(ptr, 0);
+            return *this;
         }
 
-        void set_flag(size_t i, bool flag)
+        builder& set_flag(size_t i, bool flag)
         {
             m_request.m_flags[i] = flag;
+            return *this;
         }
 
-        void set_extra(const utils::any& extra)
+        builder& set_extra(const utils::any& extra)
         {
             m_request.m_extra = extra;
+            return *this;
         }
 
         dealloc_request build() const
@@ -337,14 +350,16 @@ public:
     public:
         builder() = default;
 
-        void set_flag(size_t i, bool flag)
+        builder& set_flag(size_t i, bool flag)
         {
             m_response.m_flags[i] = flag;
+            return *this;
         }
 
-        void set_extra(const utils::any& extra)
+        builder& set_extra(const utils::any& extra)
         {
             m_response.m_extra = extra;
+            return *this;
         }
 
         dealloc_response build() const
