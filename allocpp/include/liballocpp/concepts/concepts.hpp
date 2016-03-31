@@ -103,13 +103,12 @@ public:
         dealloc_response_type dealloc_resp = layout.deallocate(dealloc_req);
 
         bool b;
-        b = layout.is_available(s);
+        b = layout.is_available(alloc_req);
         b = layout.owns(p);
         b = layout.empty();
     }
 private:
     pointer_type p;
-    size_type s;
     alloc_request_type alloc_req;
     dealloc_request_type dealloc_req;
 };
@@ -159,6 +158,72 @@ public:
     }
 private:
     block_ptr block;
+};
+
+template <typename T>
+class BaseAllocPolicy
+{
+    typedef typename T::pointer_type pointer_type;
+    typedef typename T::concept_tag concept_tag;
+    typedef alloc_request<pointer_type> alloc_request_type;
+    typedef alloc_response<pointer_type> alloc_response_type;
+    typedef dealloc_request<pointer_type> dealloc_request_type;
+    typedef dealloc_response<pointer_type> dealloc_response_type;
+public:
+    ALLOCPP_CONCEPT_USAGE(BaseAllocPolicy)
+    {
+        alloc_response_type alloc_resp = alloc.allocate(alloc_req);
+        dealloc_response_type dealloc_resp = alloc.deallocate(dealloc_req);
+
+        bool b;
+        b = alloc.is_available(alloc_req);
+        b = alloc.owns(p);
+    }
+private:
+    T alloc;
+    pointer_type p;
+    alloc_request_type alloc_req;
+    dealloc_request_type dealloc_req;
+};
+
+template <typename T>
+class StatelessAllocPolicy
+    : BaseAllocPolicy<T>
+{
+public:
+    ALLOCPP_CONCEPT_USAGE(StatelessAllocPolicy)
+    {
+        T alloc;                                                // require default construction
+        T alloc_(alloc);                                        // require copy construction
+    }
+};
+
+template <typename T>
+class StatefulAllocPolicy
+        : BaseAllocPolicy<T>
+{
+    typedef typename T::alloc_pointer_type alloc_pointer_type;
+    typedef typename T::internal_alloc_type internal_alloc_type;
+public:
+    ALLOCPP_CONCEPT_USAGE(StatefulAllocPolicy)
+    {
+        bool b;
+
+        b = T::construct(pa, internal_alloc);   // require factory-construction method
+                                                // that constructs instance of T inplace using internal_alloc
+                                                // to satisfy any additional memory allocation
+
+        T::destroy(pa, internal_alloc);         // require factory-destruction method
+                                                // that destroys instance of T inplace using internal_alloc
+                                                // to deallocate any additional memory used by instance
+
+        b = alloc.empty();                      // checks whether allocator is empty,
+                                                // i.e. there is no chunks allocated by it
+    }
+private:
+    T alloc;
+    alloc_pointer_type pa;
+    internal_alloc_type internal_alloc;
 };
 
 }}

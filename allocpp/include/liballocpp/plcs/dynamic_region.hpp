@@ -1,6 +1,7 @@
 #ifndef ALLOCPP_DYNAMIC_REGION_HPP
 #define ALLOCPP_DYNAMIC_REGION_HPP
 
+#include <liballocpp/concepts/concepts.hpp>
 #include <liballocpp/concepts/tags.hpp>
 #include <liballocpp/ptrs/block_ptr.hpp>
 #include <liballocpp/utils/pointer.hpp>
@@ -15,6 +16,8 @@ public:
     typedef Ptr pointer_type;
     typedef typename utils::pointer_traits<pointer_type>::size_type size_type;
     typedef concepts::dynamic_region_tag concept_tag;
+
+    ALLOCPP_CONCEPT_ASSERT((concepts::RandomAccessPtr<pointer_type>));
 
     dynamic_region(const block_ptr& block)
         : m_block(block)
