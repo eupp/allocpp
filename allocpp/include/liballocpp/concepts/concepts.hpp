@@ -178,6 +178,7 @@ public:
         bool b;
         b = alloc.is_available(alloc_req);
         b = alloc.owns(p);
+        ALLOCPP_UNUSED(b);
     }
 private:
     T alloc;
