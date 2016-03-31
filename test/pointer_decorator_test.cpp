@@ -3,7 +3,7 @@
 #include <type_traits>
 
 #include <liballocpp/concepts/concepts.hpp>
-#include <liballocpp/concepts/pointer_concept_tag.hpp>
+#include "liballocpp/concepts/tags.hpp"
 #include <liballocpp/ptrs/pointer_decorator.hpp>
 
 using namespace allocpp::ptrs;

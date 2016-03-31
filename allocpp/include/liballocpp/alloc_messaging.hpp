@@ -24,7 +24,7 @@ template <typename pointer_type>
 class alloc_request
 {
 public:
-    typedef utils::pointer_traits<pointer_type>::size_type size_type;
+    typedef typename utils::pointer_traits<pointer_type>::size_type size_type;
 
     static const size_t FLAGS_COUNT = details::alloc_flags::FLAGS_COUNT;
 
@@ -124,7 +124,7 @@ template <typename pointer_type>
 class alloc_response
 {
 public:
-    typedef utils::pointer_traits<pointer_type>::size_type size_type;
+    typedef typename utils::pointer_traits<pointer_type>::size_type size_type;
     typedef ptrs::block_ptr<pointer_type> block_ptr;
 
     static const size_t FLAGS_COUNT = details::alloc_flags::FLAGS_COUNT;
@@ -222,7 +222,7 @@ template <typename pointer_type>
 class dealloc_request
 {
 public:
-    typedef utils::pointer_traits<pointer_type>::size_type size_type;
+    typedef typename utils::pointer_traits<pointer_type>::size_type size_type;
     typedef ptrs::block_ptr<pointer_type> block_ptr;
 
     static const size_t FLAGS_COUNT = details::alloc_flags::FLAGS_COUNT;
@@ -231,11 +231,11 @@ public:
         : m_block(nullptr)
     {}
 
-    dealloc_request(const alloc_response&) = default;
-    dealloc_request(alloc_response&&) = default;
+    dealloc_request(const dealloc_request&) = default;
+    dealloc_request(dealloc_request&&) = default;
 
-    dealloc_request& operator=(const alloc_response&) = default;
-    dealloc_request& operator=(alloc_response&&) = default;
+    dealloc_request& operator=(const dealloc_request&) = default;
+    dealloc_request& operator=(dealloc_request&&) = default;
 
     block_ptr memory_block() const
     {
@@ -318,7 +318,7 @@ template <typename pointer_type>
 class dealloc_response
 {
 public:
-    typedef utils::pointer_traits<pointer_type>::size_type size_type;
+    typedef typename utils::pointer_traits<pointer_type>::size_type size_type;
 
     static const size_t FLAGS_COUNT = details::alloc_flags::FLAGS_COUNT;
 

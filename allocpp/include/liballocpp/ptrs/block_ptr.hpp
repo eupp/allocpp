@@ -1,7 +1,7 @@
 #ifndef ALLOCPP_BLOCK_PTR_H
 #define ALLOCPP_BLOCK_PTR_H
 
-#include <liballocpp/concepts/pointer_concept_tag.hpp>
+#include <liballocpp/concepts/tags.hpp>
 #include <liballocpp/utils/pointer.hpp>
 #include <liballocpp/ptrs/pointer_decorator.hpp>
 
@@ -57,7 +57,7 @@ public:
 
     Ptr ptr() const
     {
-        return m_decorated;
+        return this->m_decorated;
     }
 
     size_type size() const
@@ -70,7 +70,7 @@ public:
         return p1.m_decorated == p2.m_decorated && p1.m_size == p2.m_size;
     }
 
-    friend bool operator!=(const pointer_decorator& p1, const pointer_decorator& p2)
+    friend bool operator!=(const block_ptr& p1, const block_ptr& p2)
     {
         return !(p1 == p2);
     }

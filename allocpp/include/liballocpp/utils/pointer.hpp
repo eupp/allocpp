@@ -5,7 +5,7 @@
 #include <type_traits>
 #include <boost/tti/member_type.hpp>
 
-#include <liballocpp/concepts/pointer_concept_tag.hpp>
+#include <liballocpp/concepts/tags.hpp>
 
 namespace allocpp { namespace utils {
 

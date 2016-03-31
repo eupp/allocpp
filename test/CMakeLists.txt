@@ -1,7 +1,7 @@
 enable_testing()
 
 set(allocpp_TESTS
-        pointer_decorator_test.cpp)
+        pointer_decorator_test.cpp plcs/regions_test.cpp)
 
 find_package(Threads REQUIRED)
 

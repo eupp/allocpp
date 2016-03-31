@@ -4,8 +4,7 @@
 #include <type_traits>
 #include <boost/tti/member_type.hpp>
 
-#include <liballocpp/concepts/concepts.hpp>
-#include <liballocpp/concepts/pointer_concept_tag.hpp>
+#include <liballocpp/concepts/tags.hpp>
 #include <liballocpp/utils/pointer.hpp>
 
 namespace allocpp { namespace ptrs {
