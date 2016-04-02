@@ -10,4 +10,5 @@ using namespace allocpp::concepts;
 ALLOCPP_CONCEPT_ASSERT((StaticMemoryRegion<static_region<64>>));
 ALLOCPP_CONCEPT_ASSERT((DynamicMemoryRegion<dynamic_region<byte*>>));
 
-
+ALLOCPP_CONCEPT_ASSERT((MemoryRegion<static_region<64>>));
+ALLOCPP_CONCEPT_ASSERT((MemoryRegion<dynamic_region<byte*>>));

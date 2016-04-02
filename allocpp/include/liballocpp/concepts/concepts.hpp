@@ -6,6 +6,7 @@
 #include <boost/concept_check.hpp>
 
 #include <liballocpp/alloc_messaging.hpp>
+#include <liballocpp/concepts/tags.hpp>
 #include <liballocpp/ptrs/block_ptr.hpp>
 #include <liballocpp/utils/pointer.hpp>
 
@@ -159,6 +160,28 @@ public:
 private:
     block_ptr block;
 };
+
+namespace details {
+template <typename T, typename Tag>
+struct select_region_concept;
+
+template <typename T>
+struct select_region_concept<T, static_region_tag>
+{
+    typedef StaticMemoryRegion<T> type;
+};
+
+template <typename T>
+struct select_region_concept<T, dynamic_region_tag>
+{
+    typedef DynamicMemoryRegion<T> type;
+};
+}
+
+template <typename T>
+class MemoryRegion
+    : details::select_region_concept<T, typename T::concept_tag>::type
+{};
 
 template <typename T>
 class BaseAllocPolicy

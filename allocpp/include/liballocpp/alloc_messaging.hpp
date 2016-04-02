@@ -277,6 +277,12 @@ public:
     public:
         builder() = default;
 
+        builder& set_memory_block(pointer_type ptr, size_type size)
+        {
+            m_request.m_block = block_ptr(ptr, size);
+            return *this;
+        }
+
         builder& set_memory_block(const block_ptr& block)
         {
             m_request.m_block = block;
