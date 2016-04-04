@@ -95,6 +95,7 @@ template <typename T>
 class BaseAllocPolicy
 {
     typedef typename T::pointer_type pointer_type;
+    typedef typename utils::pointer_traits<pointer_type>::size_type size_type;
     typedef alloc_request<pointer_type> alloc_request_type;
     typedef alloc_response<pointer_type> alloc_response_type;
     typedef dealloc_request<pointer_type> dealloc_request_type;
@@ -105,13 +106,8 @@ public:
         alloc_response_type alloc_resp = alloc.allocate(alloc_req);
         dealloc_response_type dealloc_resp = alloc.deallocate(dealloc_req);
 
-        bool b;
-        b = alloc.is_feasible(alloc_req);
-        b = alloc.is_feasible(dealloc_req);
-
         ownership owns = alloc.owns(p);
-
-        ALLOCPP_UNUSED(b, owns);
+        ALLOCPP_UNUSED(owns);
     }
 private:
     T alloc;
@@ -139,11 +135,17 @@ template <typename T>
 class StatefulAllocPolicy
     : BaseAllocPolicy<T>
 {
+    typedef typename T::pointer_type pointer_type;
     typedef typename T::concept_tag concept_tag;
+    typedef alloc_request<pointer_type> alloc_request_type;
+    typedef alloc_response<pointer_type> alloc_response_type;
+    typedef dealloc_request<pointer_type> dealloc_request_type;
 public:
     ALLOCPP_CONCEPT_USAGE(StatefulAllocPolicy)
     {
         bool b;
+        b = alloc.is_feasible(alloc_req);
+        b = alloc.is_feasible(dealloc_req);
         b = alloc.empty();                      // checks whether allocator is empty,
                                                 // i.e. there is no chunks allocated by it
         ALLOCPP_UNUSED(b);
@@ -152,6 +154,8 @@ public:
     }
 private:
     T alloc;
+    alloc_request_type alloc_req;
+    dealloc_request_type dealloc_req;
 };
 
 template <typename T>
@@ -159,16 +163,22 @@ class MemoryLayoutPolicy
     : StatefulAllocPolicy<T>
 {
     typedef typename T::pointer_type pointer_type;
-    typedef typename T::size_type size_type;
-    typedef ptrs::block_ptr<pointer_type> block_ptr_type;
+    typedef typename utils::pointer_traits<pointer_type>::size_type size_type;
     typedef alloc_request<pointer_type> alloc_request_type;
     typedef typename T::concept_tag concept_tag;
+
+    typedef typename T::internal_pointer_type internal_pointer_type;
+    typedef typename utils::pointer_traits<internal_pointer_type>::size_type internal_size_type;
+    typedef ptrs::block_ptr<internal_pointer_type> block_ptr_type;
 public:
     ALLOCPP_CONCEPT_USAGE(MemoryLayoutPolicy)
     {
         T layout(block, alloc_req);                 // require construction from block_ptr and alloc_request
 
+        internal_size_type blk_size = T::block_size(alloc_req);
         block_ptr_type blk = layout.block();
+
+        ALLOCPP_UNUSED(blk, blk_size);
 
         details::same_type(memory_layout_policy_tag(), concept_tag());
     }

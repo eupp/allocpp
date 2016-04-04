@@ -3,9 +3,8 @@
 
 namespace allocpp { namespace utils {
 
-class noncopyable
+struct noncopyable
 {
-public:
     noncopyable() = default;
 
     noncopyable(const noncopyable&) = delete;
@@ -15,9 +14,8 @@ public:
     noncopyable& operator=(noncopyable&&) = default;
 };
 
-class nonmovable
+struct nonmovable
 {
-public:
     nonmovable() = default;
 
     nonmovable(const nonmovable&) = default;
@@ -27,6 +25,11 @@ public:
     nonmovable& operator=(nonmovable&&) = delete;
 };
 
+struct nonassignable
+{
+    nonassignable& operator=(const nonassignable&) = delete;
+    nonassignable& operator=(nonassignable&&) = delete;
+};
 
 }}
 

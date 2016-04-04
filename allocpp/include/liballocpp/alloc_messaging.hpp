@@ -180,6 +180,11 @@ public:
         return m_extra;
     }
 
+    explicit operator bool() const
+    {
+        return static_cast<bool>(m_block.ptr());
+    }
+
     class builder : private utils::noncopyable, private utils::nonmovable
     {
     public:
