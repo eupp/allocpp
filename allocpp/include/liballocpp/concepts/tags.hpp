@@ -13,6 +13,7 @@ struct dynamic_region_tag {};
 
 struct stateless_alloc_policy_tag {};
 struct stateful_alloc_policy_tag {};
+struct memory_layout_policy_tag : public stateful_alloc_policy_tag {};
 
 }}
 

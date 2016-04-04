@@ -26,14 +26,19 @@ public:
         return dealloc_response<pointer_type>();
     }
 
-    bool is_available(const alloc_request<pointer_type>&)
+    bool is_feasible(const alloc_request<pointer_type>&)
     {
         return false;
     }
 
-    bool owns(pointer_type)
+    bool is_feasible(const dealloc_request<pointer_type>&)
     {
         return false;
+    }
+
+    ownership owns(pointer_type)
+    {
+        return ownership::UNDEFINED;
     }
 };
 

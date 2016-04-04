@@ -86,108 +86,15 @@ class RandomAccessPtr
     , boost::RandomAccessIterator<T>
 {};
 
-template <typename T>
-class MemoryLayout
-{
-    typedef typename T::pointer_type pointer_type;
-    typedef typename T::size_type size_type;
-    typedef alloc_request<pointer_type> alloc_request_type;
-    typedef alloc_response<pointer_type> alloc_response_type;
-    typedef dealloc_request<pointer_type> dealloc_request_type;
-    typedef dealloc_response<pointer_type> dealloc_response_type;
-public:
-    ALLOCPP_CONCEPT_USAGE(MemoryLayout)
-    {
-        T layout(alloc_req);                                            // require construction from alloc_request
-
-        alloc_response_type alloc_resp = layout.allocate(alloc_req);
-        dealloc_response_type dealloc_resp = layout.deallocate(dealloc_req);
-
-        bool b;
-        b = layout.is_available(alloc_req);
-        b = layout.owns(p);
-        b = layout.empty();
-    }
-private:
-    pointer_type p;
-    alloc_request_type alloc_req;
-    dealloc_request_type dealloc_req;
-};
-
-template <typename T>
-class StaticMemoryRegion
-{
-    typedef typename T::pointer_type pointer_type;
-    typedef typename T::size_type size_type;
-    typedef typename T::concept_tag concept_tag;
-public:
-    ALLOCPP_CONCEPT_USAGE(StaticMemoryRegion)
-    {
-        T region;                           // require default construction
-
-        pointer_type p = region.memory();
-        size_type s = region.size();
-
-        p = region.begin();
-        p = region.end();
-
-        bool b = region.owns(p);
-        ALLOCPP_UNUSED(b);
-    }
-};
-
-template <typename T>
-class DynamicMemoryRegion
-{
-    typedef typename T::pointer_type pointer_type;
-    typedef typename T::size_type size_type;
-    typedef typename T::concept_tag concept_tag;
-    typedef ptrs::block_ptr<pointer_type> block_ptr;
-public:
-    ALLOCPP_CONCEPT_USAGE(DynamicMemoryRegion)
-    {
-        T region(block);                           // require construction from block_ptr
-
-        pointer_type p = region.memory();
-        size_type s = region.size();
-
-        p = region.begin();
-        p = region.end();
-
-        bool b = region.owns(p);
-        ALLOCPP_UNUSED(b);
-    }
-private:
-    block_ptr block;
-};
-
 namespace details {
-template <typename T, typename Tag>
-struct select_region_concept;
-
 template <typename T>
-struct select_region_concept<T, static_region_tag>
-{
-    typedef StaticMemoryRegion<T> type;
-};
-
-template <typename T>
-struct select_region_concept<T, dynamic_region_tag>
-{
-    typedef DynamicMemoryRegion<T> type;
-};
+void same_type(const T&, const T&);
 }
-
-template <typename T>
-class MemoryRegion
-    : details::select_region_concept<T, typename T::concept_tag>::type
-{};
 
 template <typename T>
 class BaseAllocPolicy
 {
     typedef typename T::pointer_type pointer_type;
-    typedef typename T::concept_tag concept_tag;
     typedef alloc_request<pointer_type> alloc_request_type;
     typedef alloc_response<pointer_type> alloc_response_type;
     typedef dealloc_request<pointer_type> dealloc_request_type;
@@ -199,9 +106,12 @@ public:
         dealloc_response_type dealloc_resp = alloc.deallocate(dealloc_req);
 
         bool b;
-        b = alloc.is_available(alloc_req);
-        b = alloc.owns(p);
-        ALLOCPP_UNUSED(b);
+        b = alloc.is_feasible(alloc_req);
+        b = alloc.is_feasible(dealloc_req);
+
+        ownership owns = alloc.owns(p);
+
+        ALLOCPP_UNUSED(b, owns);
     }
 private:
     T alloc;
@@ -214,40 +124,57 @@ template <typename T>
 class StatelessAllocPolicy
     : BaseAllocPolicy<T>
 {
+    typedef typename T::concept_tag concept_tag;
 public:
     ALLOCPP_CONCEPT_USAGE(StatelessAllocPolicy)
     {
         T alloc;                                                // require default construction
         T alloc_(alloc);                                        // require copy construction
+
+        details::same_type(stateless_alloc_policy_tag(), concept_tag());
     }
 };
 
 template <typename T>
 class StatefulAllocPolicy
-        : BaseAllocPolicy<T>
+    : BaseAllocPolicy<T>
 {
-    typedef typename T::alloc_pointer_type alloc_pointer_type;
-    typedef typename T::internal_alloc_type internal_alloc_type;
+    typedef typename T::concept_tag concept_tag;
 public:
     ALLOCPP_CONCEPT_USAGE(StatefulAllocPolicy)
     {
         bool b;
-
-        b = T::construct(pa, internal_alloc);   // require factory-construction method
-                                                // that constructs instance of T inplace using internal_alloc
-                                                // to satisfy any additional memory allocation
-
-        T::destroy(pa, internal_alloc);         // require factory-destruction method
-                                                // that destroys instance of T inplace using internal_alloc
-                                                // to deallocate any additional memory used by instance
-
         b = alloc.empty();                      // checks whether allocator is empty,
                                                 // i.e. there is no chunks allocated by it
+        ALLOCPP_UNUSED(b);
+
+        details::same_type(stateful_alloc_policy_tag(), concept_tag());
     }
 private:
     T alloc;
-    alloc_pointer_type pa;
-    internal_alloc_type internal_alloc;
+};
+
+template <typename T>
+class MemoryLayoutPolicy
+    : StatefulAllocPolicy<T>
+{
+    typedef typename T::pointer_type pointer_type;
+    typedef typename T::size_type size_type;
+    typedef ptrs::block_ptr<pointer_type> block_ptr_type;
+    typedef alloc_request<pointer_type> alloc_request_type;
+    typedef typename T::concept_tag concept_tag;
+public:
+    ALLOCPP_CONCEPT_USAGE(MemoryLayoutPolicy)
+    {
+        T layout(block, alloc_req);                 // require construction from block_ptr and alloc_request
+
+        block_ptr_type blk = layout.block();
+
+        details::same_type(memory_layout_policy_tag(), concept_tag());
+    }
+private:
+    block_ptr_type block;
+    alloc_request_type alloc_req;
 };
 
 }}

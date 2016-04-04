@@ -20,6 +20,12 @@ public:
 
 }
 
+enum class ownership {
+    OWNS,
+    NOT_OWNS,
+    UNDEFINED
+};
+
 template <typename pointer_type>
 class alloc_request
 {
@@ -131,7 +137,6 @@ public:
 
     alloc_response()
         : m_block(nullptr)
-        , m_alignment(0)
     {}
 
     alloc_response(const alloc_response&) = default;
@@ -157,7 +162,7 @@ public:
 
     size_type alignment() const
     {
-        return m_alignment;
+        return m_block.alignment();
     }
 
     bool flag(size_t i) const
@@ -186,12 +191,6 @@ public:
             return *this;
         }
 
-        builder& set_alignment(size_type alignment)
-        {
-            m_response.m_alignment = alignment;
-            return *this;
-        }
-
         builder& set_flag(size_t i, bool flag)
         {
             m_response.m_flags[i] = flag;
@@ -213,7 +212,6 @@ public:
     };
 private:
     block_ptr m_block;
-    size_type m_alignment;
     details::alloc_flags m_flags;
     utils::any m_extra;
 };
@@ -252,6 +250,11 @@ public:
         return m_block.size();
     }
 
+    size_type alignment() const
+    {
+        return m_block.alignment();
+    }
+
     bool size_set() const
     {
         return size() != 0;
@@ -277,9 +280,9 @@ public:
     public:
         builder() = default;
 
-        builder& set_memory_block(pointer_type ptr, size_type size)
+        builder& set_memory_block(pointer_type ptr, size_type size, size_type alignment)
         {
-            m_request.m_block = block_ptr(ptr, size);
+            m_request.m_block = block_ptr(ptr, size, alignment);
             return *this;
         }
 
@@ -291,7 +294,7 @@ public:
 
         builder& set_ptr(pointer_type ptr)
         {
-            m_request.m_block = block_ptr(ptr, 0);
+            m_request.m_block = block_ptr(ptr, 0, 0);
             return *this;
         }
 
