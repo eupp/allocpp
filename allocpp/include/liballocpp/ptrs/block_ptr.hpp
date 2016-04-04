@@ -25,6 +25,7 @@ public:
     block_ptr()
         : base_type(nullptr)
         , m_size(0)
+        , m_alignment(0)
     {}
 
     block_ptr(nullptr_t)
@@ -34,22 +35,25 @@ public:
     block_ptr(const block_ptr&) = default;
     block_ptr(block_ptr&&) = default;
 
-    block_ptr(const Ptr& p, size_type size)
+    block_ptr(const Ptr& p, size_type size, size_type alignment)
         : base_type(p)
         , m_size(size)
+        , m_alignment(alignment)
     {}
 
-    explicit block_ptr(Ptr&& p, size_type size)
+    explicit block_ptr(Ptr&& p, size_type size, size_type alignment)
         : base_type(std::move(p))
         , m_size(size)
+        , m_alignment(alignment)
     {}
 
     template <typename I = innermost_type, typename = typename std::enable_if<
             std::is_constructible<Ptr, I>::value
         >::type>
-    explicit block_ptr(innermost_type p, size_type size)
+    explicit block_ptr(innermost_type p, size_type size, size_type alignment)
         : base_type(p)
         , m_size(size)
+        , m_alignment(alignment)
     {}
 
     block_ptr& operator=(const block_ptr&) = default;
@@ -65,9 +69,14 @@ public:
         return m_size;
     }
 
+    size_type alignment() const
+    {
+        return m_alignment;
+    }
+
     friend bool operator==(const block_ptr& p1, const block_ptr& p2)
     {
-        return p1.m_decorated == p2.m_decorated && p1.m_size == p2.m_size;
+        return p1.m_decorated == p2.m_decorated && p1.size() == p2.size() && p1.alignment() == p2.alignment();
     }
 
     friend bool operator!=(const block_ptr& p1, const block_ptr& p2)
@@ -76,6 +85,7 @@ public:
     }
 private:
     size_type m_size;
+    size_type m_alignment;
 };
 
 }}
