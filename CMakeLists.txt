@@ -5,3 +5,4 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -fPIC -fno-strict-alias
 
 add_subdirectory(allocpp)
 add_subdirectory(test)
+add_subdirectory(benchmark)
