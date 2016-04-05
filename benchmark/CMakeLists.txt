@@ -1,7 +1,7 @@
 set(allocpp_BENCHMARKS
         main.cpp
         malloc.cpp
-        )
+        mmap.cpp)
 
 include_directories(${CMAKE_SOURCE_DIR}/allocpp/include)
 
