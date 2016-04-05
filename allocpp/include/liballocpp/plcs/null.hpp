@@ -13,6 +13,16 @@ public:
     typedef Ptr pointer_type;
     typedef concepts::stateless_alloc_policy_tag concept_tag;
 
+    static constexpr size_t max_size()
+    {
+        return 0;
+    }
+
+    static constexpr size_t max_alignment()
+    {
+        return 0;
+    }
+
     null() = default;
     null(const null&) = default;
 
@@ -24,16 +34,6 @@ public:
     dealloc_response<pointer_type> deallocate(const dealloc_request<pointer_type>&)
     {
         return dealloc_response<pointer_type>();
-    }
-
-    bool is_feasible(const alloc_request<pointer_type>&)
-    {
-        return false;
-    }
-
-    bool is_feasible(const dealloc_request<pointer_type>&)
-    {
-        return false;
     }
 
     ownership owns(pointer_type)

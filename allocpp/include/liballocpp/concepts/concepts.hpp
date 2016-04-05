@@ -106,6 +106,9 @@ public:
         alloc_response_type alloc_resp = alloc.allocate(alloc_req);
         dealloc_response_type dealloc_resp = alloc.deallocate(dealloc_req);
 
+        size_type max_size = T::max_size();
+        size_type max_alignment = T::max_alignment();
+
         ownership owns = alloc.owns(p);
         ALLOCPP_UNUSED(owns);
     }

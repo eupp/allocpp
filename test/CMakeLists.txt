@@ -21,14 +21,12 @@ find_library(GMOCK_MAIN_LIB NAMES libgmock_main.a
         /usr/local/lib64
         )
 
-message(WARNING $<TARGET_PROPERTY:liballocpp, INTERFACE_INCLUDE_DIRECTORIES>)
-
 include_directories(${CMAKE_SOURCE_DIR}/allocpp/include)
 
 add_executable(allocpp_test ${allocpp_TESTS})
 target_link_libraries(allocpp_test ${GMOCK_LIB})
 target_link_libraries(allocpp_test ${GMOCK_MAIN_LIB})
 target_link_libraries(allocpp_test ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(allocpp_test LINK_INTERFACE_LIBRARIES liballocpp)
+target_link_libraries(allocpp_test liballocpp)
 
 add_test(all_tests allocpp_test)

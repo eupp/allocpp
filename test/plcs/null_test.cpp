@@ -30,7 +30,4 @@ TEST(null_plc_test, test_null_plc)
     byte v;
     EXPECT_EQ(ownership::UNDEFINED, plc.owns(nullptr));
     EXPECT_EQ(ownership::UNDEFINED, plc.owns(&v));
-
-    EXPECT_FALSE(plc.is_feasible(alloc_req));
-    EXPECT_FALSE(plc.is_feasible(dealloc_req));
 }
