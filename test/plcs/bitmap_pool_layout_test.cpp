@@ -37,7 +37,7 @@ TEST_F(bitmap_pool_layout_test, test_block_size)
 {
     size_t block_size = layout_type::block_size(m_req);
     ASSERT_LE(m_req.size(), block_size);
-    ASSERT_LE(POOL_SIZE, block_size);
+    ASSERT_LE((size_t) POOL_SIZE, block_size);
 }
 
 TEST_F(bitmap_pool_layout_test, test_alloc_is_feasible)
@@ -82,6 +82,40 @@ TEST_F(bitmap_pool_layout_test, test_deallocate)
             .set_memory_block(rsp.memory_block())
             .build();
     auto dealloc_rsp = m_layout.deallocate(dealloc_req);
+}
+
+TEST_F(bitmap_pool_layout_test, test_owns)
+{
+    byte b;
+    ASSERT_EQ(ownership::NOT_OWNS, m_layout.owns(nullptr));
+    ASSERT_EQ(ownership::NOT_OWNS, m_layout.owns(&b));
+    for (size_t i = 0; i < POOL_SIZE; ++i) {
+        auto rsp = m_layout.allocate(m_req);
+        ASSERT_EQ(ownership::OWNS, m_layout.owns(rsp.ptr()));
+    }
+}
+
+TEST_F(bitmap_pool_layout_test, test_empty)
+{
+    ASSERT_TRUE(m_layout.empty());
+
+    auto rsp = m_layout.allocate(m_req);
+    ASSERT_FALSE(m_layout.empty());
+
+
+    auto dealloc_req = dealloc_request<byte*>::builder()
+            .set_memory_block(rsp.memory_block())
+            .build();
+    auto dealloc_rsp = m_layout.deallocate(dealloc_req);
+    ASSERT_TRUE(m_layout.empty());
+}
+
+TEST_F(bitmap_pool_layout_test, test_block)
+{
+    auto blk = m_layout.block();
+    ASSERT_EQ(m_mem.get(), blk.ptr());
+    ASSERT_EQ((size_t) POOL_SIZE, blk.size());
+    ASSERT_EQ(0, blk.alignment());
 }
 
 }

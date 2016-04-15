@@ -2,11 +2,13 @@
 #define ALLOCPP_BITMAP_POOL_LAYOUT_HPP
 
 #include <limits>
+#include <climits>
 #include <bitset>
 #include <cassert>
 #include <exception>
 #include <string>
 #include <sstream>
+#include <array>
 
 #include <liballocpp/alloc_messaging.hpp>
 #include <liballocpp/concepts/concepts.hpp>
@@ -14,6 +16,7 @@
 #include <liballocpp/ptrs/block_ptr.hpp>
 #include <liballocpp/utils/pointer.hpp>
 #include <liballocpp/utils/math.hpp>
+
 
 namespace allocpp { namespace plcs {
 
@@ -39,20 +42,15 @@ public:
             ss << "Cannot fit allocation request with given block" << std::endl;
             ss << "block size: " << blk.size() << "; block align: " << blk.alignment()
                << "; request size: " << req.size() << "; request align: " << req.alignment() << std::endl;
-
-            auto str = ss.str();
-            assert(str.size() < BUF_SIZE - 1);
-            memset(m_buf, 0, BUF_SIZE);
-            memcpy(m_buf, str.c_str(), str.size());
+            m_msg = ss.str();
         }
 
-        const char* what() const override
+        const char* what() const noexcept override
         {
-            return m_buf;
+            return m_msg.c_str();
         }
     private:
-        static const size_t BUF_SIZE = 200;
-        static char m_buf[BUF_SIZE];
+        std::string m_msg;
     };
 
     static constexpr size_type max_size()
@@ -87,6 +85,7 @@ public:
 
     bool is_feasible(const alloc_request<pointer_type>& req)
     {
+        std::string s = m_bitmap.to_string();
         return m_bitmap.any();
     }
 
@@ -94,29 +93,31 @@ public:
     {
         assert(is_feasible(req));
 
-        size_t ind = utils::msb(m_bitmap.to_ullong());
+        size_t ind = utils::msb(m_bitmap.to_ullong()) - 1;
         m_bitmap[ind] = false;
         auto blk = ptrs::block_ptr<pointer_type>(m_blk.ptr() + ind * req.size(), req.size(), req.alignment());
-        return alloc_response<pointer_type>::builder().set_memory_block(blk).build();
+        return typename alloc_response<pointer_type>::builder()
+                .set_memory_block(blk)
+                .build();
     }
 
     bool is_feasible(const dealloc_request<pointer_type>& req)
     {
-        return owns(req.ptr());
+        return m_blk.owns(req.ptr());
     }
 
     dealloc_response<pointer_type> deallocate(const dealloc_request<pointer_type>& req)
     {
         assert(is_feasible(req));
 
-        size_t ind = (req.ptr() - m_blk.ptr());
+        size_t ind = (req.ptr() - m_blk.ptr()) + 1;
         m_bitmap[ind] = true;
-        return dealloc_response<pointer_type>::builder().build();
+        return typename dealloc_response<pointer_type>::builder().build();
     }
 
-    bool owns(pointer_type p) const
+    ownership owns(pointer_type p) const
     {
-        return m_blk.owns(p);
+        return m_blk.owns(p) ? ownership::OWNS : ownership::NOT_OWNS;
     }
 
     bool empty() const
@@ -129,18 +130,18 @@ public:
         return m_blk;
     }
 private:
-    typedef std::bitset<max_size()> bitmap_type;
-
     static constexpr size_type max_cnt()
     {
-        return sizeof(unsigned long long);
+        return CHAR_BIT * sizeof(unsigned long long);
     };
 
     // returns bitmap suitable for storing bits for cnt objects
     static constexpr ull_t get_bitmap(size_type cnt)
     {
-        return (~ (ull_t)0) >> (max_size() - cnt);
+        return (~ (ull_t)0) >> (max_cnt() - cnt);
     }
+
+    typedef std::bitset<max_cnt()> bitmap_type;
 
     ptrs::block_ptr<internal_pointer_type> m_blk;
     size_type m_cnt;

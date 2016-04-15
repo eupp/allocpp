@@ -87,6 +87,10 @@ class RandomAccessPtr
 {};
 
 namespace details {
+void is_stateless_plc(const stateless_alloc_policy_tag&);
+void is_stateful_plc(const stateful_alloc_policy_tag&);
+void is_memory_layout_plc(const memory_layout_policy_tag&);
+
 template <typename T>
 void same_type(const T&, const T&);
 }
@@ -130,7 +134,7 @@ public:
         T alloc;                                                // require default construction
         T alloc_(alloc);                                        // require copy construction
 
-        details::same_type(stateless_alloc_policy_tag(), concept_tag());
+        details::is_stateless_plc(concept_tag());
     }
 };
 
@@ -153,7 +157,7 @@ public:
                                                 // i.e. there is no chunks allocated by it
         ALLOCPP_UNUSED(b);
 
-        details::same_type(stateful_alloc_policy_tag(), concept_tag());
+        details::is_stateful_plc(concept_tag());
     }
 private:
     T alloc;
@@ -183,7 +187,7 @@ public:
 
         ALLOCPP_UNUSED(blk, blk_size);
 
-        details::same_type(memory_layout_policy_tag(), concept_tag());
+        details::is_memory_layout_plc(concept_tag());
     }
 private:
     block_ptr_type block;
