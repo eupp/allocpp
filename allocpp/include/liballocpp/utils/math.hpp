@@ -5,6 +5,8 @@
 
 namespace allocpp { namespace utils {
 
+
+// implementation is taken from http://stackoverflow.com/a/8462598/4676150
 inline size_t msb(unsigned long long n)
 {
     static const unsigned long long mask[] = {
