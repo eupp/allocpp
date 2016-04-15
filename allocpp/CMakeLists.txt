@@ -16,7 +16,7 @@ set(allocpp_LIB_HDRS
         include/liballocpp/utils/any.hpp
         include/liballocpp/utils/pointer.hpp
         include/liballocpp/utils/util.hpp
-        include/liballocpp/utils/scope_guard.hpp)
+        include/liballocpp/utils/scope_guard.hpp include/liballocpp/plcs/bitmap_pool_layout.hpp include/liballocpp/utils/math.hpp)
 
 set(allocpp_LIB_SRCS
         src/malloc.cpp)

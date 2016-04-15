@@ -1,7 +1,7 @@
 enable_testing()
 
 set(allocpp_TESTS
-        ptrs/pointer_decorator_test.cpp plcs/null_test.cpp plcs/malloc_test.cpp)
+        ptrs/pointer_decorator_test.cpp plcs/null_test.cpp plcs/malloc_test.cpp plcs/bitmap_pool_layout_test.cpp)
 
 find_package(Threads REQUIRED)
 

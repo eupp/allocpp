@@ -20,6 +20,7 @@ public:
 
     typedef typename utils::pointer_traits<Ptr>::size_type size_type;
 
+    typedef typename base_type::decorated_type decorated_type;
     typedef typename base_type::innermost_type innermost_type;
 
     block_ptr()
@@ -72,6 +73,11 @@ public:
     size_type alignment() const
     {
         return m_alignment;
+    }
+
+    bool owns(decorated_type p) const
+    {
+        return (this->m_decorated <= p) && (p - this->m_decorated < m_size);
     }
 
     friend bool operator==(const block_ptr& p1, const block_ptr& p2)
